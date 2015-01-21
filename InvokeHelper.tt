@@ -1,0 +1,87 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".g.cs" #>
+<# const int invocationCount = 11; #>
+#region License
+//  
+// Copyright 2015 Steven Thuriot
+//  
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//    http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// 
+#endregion
+
+using System;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+
+namespace Invocation
+{
+    public static partial class InvokeHelper
+    {
+		public static object FastInvoke(this Delegate @delegate, dynamic[] args)
+		{
+            if (@delegate.Method.ReturnType != typeof (void))
+            {
+				switch(args.Length)
+				{
+	<# for (var i = 0; i <= invocationCount; i++)
+	{
+		var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
+		#>				case <#= i #>:
+						return ((dynamic)@delegate)(<#= args #>);
+
+	<# } #>
+					default:
+						try
+						{
+							return @delegate.DynamicInvoke(args);
+						}
+						catch (TargetInvocationException ex)
+						{
+							ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+						}
+						break;
+				}
+			}
+			else
+			{
+				switch(args.Length)
+				{
+	<# for (var i = 0; i <= invocationCount; i++)
+	{
+		var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
+		#>				case <#= i #>:
+						((dynamic)@delegate)(<#= args #>);
+						break;
+
+	<# } #>
+					default: 
+						try
+						{
+							@delegate.DynamicInvoke(args);
+						}
+						catch (TargetInvocationException ex)
+						{
+							ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+						}
+						break;
+				}
+
+				return null;
+			}
+			
+			throw new NotSupportedException("Invocation failure");
+		}
+	}
+}
