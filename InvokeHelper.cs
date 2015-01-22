@@ -106,14 +106,24 @@ namespace Invocation
 
     static class InvokeHelper<T>
     {
-        public static Lazy<Func<T, object>> CreateLazy(PropertyInfo info)
+        public static Lazy<Func<T, object>> CreateGetterLazy(PropertyInfo info)
         {
-            return new Lazy<Func<T, object>>(() => Create(info));
+            return new Lazy<Func<T, object>>(() => CreateGetter(info));
         }
 
-        public static Lazy<Func<T, object>> CreateLazy(FieldInfo info)
+        public static Lazy<Func<T, object>> CreateGetterLazy(FieldInfo info)
         {
-            return new Lazy<Func<T, object>>(() => Create(info));
+            return new Lazy<Func<T, object>>(() => CreateGetter(info));
+        }
+
+        public static Lazy<Action<T, object>> CreateSetterLazy(PropertyInfo info)
+        {
+            return new Lazy<Action<T, object>>(() => CreateSetter(info));
+        }
+
+        public static Lazy<Action<T, object>> CreateSetterLazy(FieldInfo info)
+        {
+            return new Lazy<Action<T, object>>(() => CreateSetter(info));
         }
 
 
@@ -122,8 +132,11 @@ namespace Invocation
 
 
 
-        public static Func<T, object> Create(FieldInfo info)
+        public static Func<T, object> CreateGetter(FieldInfo info)
         {
+            if (info.IsStatic)
+                throw new NotSupportedException("Static fields are not supported.");
+
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Field(parameter, info);
             var boxExpression = Expression.Convert(memberExpression, typeof(object));
@@ -132,15 +145,57 @@ namespace Invocation
             return lambda.Compile();
         }
 
-
-        public static Func<T, object> Create(PropertyInfo info)
+        public static Action<T, object> CreateSetter(FieldInfo info)
         {
+            if (info.IsStatic)
+                throw new NotSupportedException("Static fields are not supported.");
+
+            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var memberExpression = Expression.Field(null, info);
+            return BuildSetter(parameter, memberExpression, info.FieldType);
+        }
+
+        public static Func<T, object> CreateGetter(PropertyInfo info)
+        {
+            if (IsStatic(info))
+                throw new NotSupportedException("Static fields are not supported.");
+
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Property(parameter, info);
             var boxExpression = Expression.Convert(memberExpression, typeof(object));
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
+        }
+
+        public static Action<T, object> CreateSetter(PropertyInfo info)
+        {
+            if (IsStatic(info))
+                throw new NotSupportedException("Static fields are not supported.");
+
+            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var memberExpression = Expression.Property(parameter, info);
+            return BuildSetter(parameter, memberExpression, info.PropertyType);
+        }
+
+
+
+
+        private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression, Type valueType)
+        {
+            var value = Expression.Parameter(valueType, "value");
+            var unboxedValue = Expression.Convert(value, valueType);
+            var assign = Expression.Assign(memberExpression, unboxedValue);
+
+            var lambda = Expression.Lambda<Action<T, object>>(assign, parameter, value);
+
+            return lambda.Compile();
+        }
+
+        static bool IsStatic(PropertyInfo propertyInfo)
+        {
+            return ((propertyInfo.CanRead && propertyInfo.GetMethod.IsStatic) ||
+                    (propertyInfo.CanWrite && propertyInfo.SetMethod.IsStatic));
         }
     }
 }

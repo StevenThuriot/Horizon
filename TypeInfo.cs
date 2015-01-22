@@ -27,8 +27,10 @@ namespace Invocation
     class TypeInfo<T>
     {
         public static readonly ILookup<string, MethodCaller> Methods;
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> Fields = new Dictionary<string, Lazy<Func<T, object>>>();
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> Properties = new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetFields = new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetProperties = new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetFields = new Dictionary<string, Lazy<Action<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetProperties = new Dictionary<string, Lazy<Action<T, object>>>();
 
         static TypeInfo()
         {
@@ -40,15 +42,25 @@ namespace Invocation
 
                 if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
                 {
-                    Properties[key] = InvokeHelper<T>.CreateLazy((PropertyInfo)member);
+                    var propertyInfo = (PropertyInfo)member;
+                    if (propertyInfo.CanWrite)
+                        SetProperties[key] = InvokeHelper<T>.CreateSetterLazy(propertyInfo);
+
+                    if (propertyInfo.CanRead)
+                        GetProperties[key] = InvokeHelper<T>.CreateGetterLazy(propertyInfo);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
-                    Fields[key] = InvokeHelper<T>.CreateLazy((FieldInfo)member);
+                    var fieldInfo = (FieldInfo)member;
+
+                    if (!fieldInfo.IsInitOnly)
+                        SetFields[key] = InvokeHelper<T>.CreateSetterLazy(fieldInfo);
+
+                    GetFields[key] = InvokeHelper<T>.CreateGetterLazy(fieldInfo);
                 }
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
-                    var methodInfo = (MethodInfo) member;
+                    var methodInfo = (MethodInfo)member;
                     var caller = new MethodCaller(methodInfo);
                     methods.Add(caller);
                 }
@@ -57,26 +69,73 @@ namespace Invocation
             Methods = methods.ToLookup(x => x.Name, x => x);
         }
 
-        public static dynamic GetProperty(T instance, string property)
+        public static object GetProperty(T instance, string property)
         {
-            return Properties[property].Value(instance);
+            return GetProperties[property].Value(instance);
         }
 
-        public static dynamic GetField(T instance, string field)
+        public static object GetField(T instance, string field)
         {
-            return Fields[field].Value(instance);
+            return GetFields[field].Value(instance);
         }
-        
-        public static dynamic Call(T instance, InvokeMemberBinder binder, IList<object> args)
+
+        public static void SetProperty(T instance, string property, object value)
+        {
+            SetProperties[property].Value(instance, value);
+        }
+
+        public static void SetField(T instance, string field, object value)
+        {
+            SetFields[field].Value(instance, value);
+        }
+
+        public static object Call(T instance, InvokeMemberBinder binder, IList<object> args)
         {
             var methods = Methods[binder.Name];
             return CallerSelector.Call(instance, binder, args, methods);
         }
-        
-        public static dynamic Call(InvokeMemberBinder binder, IList<object> args)
+
+        public static object Call(InvokeMemberBinder binder, IList<object> args)
         {
             var methods = Methods[binder.Name];
             return CallerSelector.Call(binder, args, methods);
+        }
+
+
+
+
+
+        public static bool HasField(string field)
+        {
+            return HasGetterField(field); //No need to check setter
+        }
+
+        public static bool HasProperty(string property)
+        {
+            return HasGetterProperty(property) || HasSetterProperty(property);
+        }
+
+        public static bool HasGetterProperty(string property)
+        {
+            return GetProperties.ContainsKey(property);
+        }
+        public static bool HasSetterProperty(string property)
+        {
+            return SetProperties.ContainsKey(property);
+        }
+
+        public static bool HasGetterField(string field)
+        {
+            return GetFields.ContainsKey(field);
+        }
+        public static bool HasSetterField(string field)
+        {
+            return SetFields.ContainsKey(field);
+        }
+
+        public static bool HasMethod(string method)
+        {
+            return Methods.Contains(method);
         }
     }
 }
