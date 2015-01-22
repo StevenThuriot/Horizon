@@ -183,7 +183,7 @@ namespace Invocation
 
         private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression, Type valueType)
         {
-            var value = Expression.Parameter(valueType, "value");
+            var value = Expression.Parameter(Constants.ObjectType, "value");
             var unboxedValue = Expression.Convert(value, valueType);
             var assign = Expression.Assign(memberExpression, unboxedValue);
 
