@@ -89,16 +89,78 @@ namespace Invocation
             SetFields[field].Value(instance, value);
         }
 
-        public static object Call(T instance, InvokeMemberBinder binder, IList<object> args)
+        public static bool TryGetProperty(T instance, string property, out object result)
+        {
+			Lazy<Func<T, object>> getter;
+            if (GetProperties.TryGetValue(property, out getter))
+            {
+                result = getter.Value(instance);
+                return true;
+            }
+				
+			result = null;
+			return false;
+        }
+
+        public static bool TryGetField(T instance, string field, out object result)
+        {
+			Lazy<Func<T, object>> getter;
+            if (GetFields.TryGetValue(field, out getter))
+            {
+                result = getter.Value(instance);
+                return true;
+            }
+				
+			result = null;
+			return false;
+        }
+
+        public static bool TrySetProperty(T instance, string property, object value)
+        {
+			Lazy<Action<T, object>> setter;
+			if (SetProperties.TryGetValue(property, out setter))
+			{
+				setter.Value(instance, value);
+				return true;
+			}
+				
+            return false;
+        }
+
+        public static bool TrySetField(T instance, string field, object value)
+        {
+			Lazy<Action<T, object>> setter;
+			if (SetFields.TryGetValue(field, out setter))
+			{
+				setter.Value(instance, value);
+				return true;
+			}
+				
+            return false;
+        }
+
+        public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args)
         {
             var methods = Methods[binder.Name];
             return CallerSelector.Call(instance, binder, args, methods);
         }
 
-        public static object Call(InvokeMemberBinder binder, IList<object> args)
+        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args)
         {
             var methods = Methods[binder.Name];
             return CallerSelector.Call(binder, args, methods);
+        }
+
+        public static bool TryCall(T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result)
+        {
+            var methods = Methods[binder.Name];
+            return CallerSelector.TryCall(instance, binder, args, methods, out result);
+        }
+
+        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, out object result)
+        {
+            var methods = Methods[binder.Name];
+            return CallerSelector.TryCall(binder, args, methods, out result);
         }
 
 

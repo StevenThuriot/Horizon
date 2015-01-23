@@ -64,22 +64,24 @@ namespace Invocation
             return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
         }
 
-        public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IList<object> args, IEnumerable<MethodCaller> callers)
+        public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
             var binderName = binder.Name;
 
             if (callers == null || !callers.Any())
-                throw new ArgumentException("Invalid method name: " + binderName);
+                return null;
 
+
+            var arguments = args.ToList();
 
             //Build argument list from binder
             var list = new List<Argument>();
             var names = new Stack<string>(binder.CallInfo.ArgumentNames);
 
             //Named parameters can always be mapped directly on the last parameters.
-            for (var i = args.Count - 1; i >= 0; i--)
+            for (var i = arguments.Count - 1; i >= 0; i--)
             {
-                var argument = args[i];
+                var argument = arguments[i];
                 string name = null;
 
                 if (names.Count > 0)
@@ -97,15 +99,17 @@ namespace Invocation
                                   select caller).FirstOrDefault();
 
             if (selectedCaller == null)
-                throw new ArgumentException("Invalid argument list for " + binderName);
+                return null;
 
             return Tuple.Create(selectedCaller, actualArguments.Select(x => x.Value).ToList());
         }
 
 
-        public static object Call(InvokeMemberBinder binder, IList<object> args, IEnumerable<MethodCaller> callers)
+        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
             var method = SelectMethod(binder, args, callers);
+
+            if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
 
             var caller = method.Item1;
             var arguments = method.Item2;
@@ -113,15 +117,51 @@ namespace Invocation
             return caller.Call(arguments);
         }
 
-        public static object Call(object instance, InvokeMemberBinder binder, IList<object> args, IEnumerable<MethodCaller> callers)
+        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
             var method = SelectMethod(binder, args, callers);
+            
+            if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
             arguments.Insert(0, new Argument("instance", instance));
 
             return caller.Call(arguments);
+        }
+        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+        {
+            var method = SelectMethod(binder, args, callers);
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var caller = method.Item1;
+            var arguments = method.Item2;
+
+            result = caller.Call(arguments);
+            return true;
+        }
+
+        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+        {
+            var method = SelectMethod(binder, args, callers);
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+            arguments.Insert(0, new Argument("instance", instance));
+
+            result = caller.Call(arguments);
+            return true;
         }
     }
 }
