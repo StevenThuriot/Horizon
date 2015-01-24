@@ -30,18 +30,22 @@ namespace Invocation
         public readonly IReadOnlyList<ParameterInfo> ParameterTypes;
         private readonly Lazy<Delegate> _caller;
         private readonly MethodInfo _info;
+        private readonly Lazy<bool> _isAsync;
 
         public MethodCaller(MethodInfo info)
         {
             _info = info;
             Name = info.Name;
-            ParameterTypes = info.GetParameters();
+            var parameterTypes = info.GetParameters();
+            ParameterTypes = parameterTypes;
             _caller = info.BuildLazy();
+
+            _isAsync = new Lazy<bool>(() => typeof (Task).IsAssignableFrom(info.ReturnType));
         }
 
         public bool IsAsync
         {
-            get { return typeof (Task).IsAssignableFrom(_info.ReturnType); }
+            get { return _isAsync.Value; }
         }
 
         public bool IsStatic {
@@ -69,9 +73,9 @@ namespace Invocation
         }
 
 
-        public object Call(IEnumerable<object> values)
+        public object Call(IEnumerable<dynamic> values)
         {
-            dynamic[] arguments = values.ToArray<dynamic>();
+            var arguments = values.ToArray();
             return _caller.Value.FastInvoke(arguments);
         }
     }

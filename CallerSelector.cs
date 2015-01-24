@@ -66,11 +66,8 @@ namespace Invocation
 
         public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
-            var binderName = binder.Name;
-
             if (callers == null || !callers.Any())
                 return null;
-
 
             var arguments = args.ToList();
 
@@ -158,7 +155,7 @@ namespace Invocation
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
-            arguments.Insert(0, new Argument("instance", instance));
+            arguments.Insert(0, instance);
 
             result = caller.Call(arguments);
             return true;
