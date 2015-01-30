@@ -24,9 +24,62 @@ using System.Reflection;
 
 namespace Invocation
 {
-    class TypeInfo<T>
+	static class TypeInfo
+	{
+		public static object GetProperty<T>(this T instance, string property)
+		{
+			return TypeInfo<T>.GetProperty(instance, property);
+		}
+
+		public static object GetField<T>(this T instance, string field)
+		{
+			return TypeInfo<T>.GetField(instance, field);
+		}
+
+		public static void SetProperty<T>(this T instance, string property, object value)
+		{
+			TypeInfo<T>.SetProperty(instance, property, value);
+		}
+
+		public static void SetField<T>(this T instance, string field, object value)
+		{
+			TypeInfo<T>.SetField(instance, field, value);
+		}
+
+		public static bool TryGetProperty<T>(this T instance, string property, out object result)
+		{
+			return TypeInfo<T>.TryGetProperty(instance, property, out result);
+		}
+
+		public static bool TryGetField<T>(this T instance, string field, out object result)
+		{
+			return TypeInfo<T>.TryGetProperty(instance, field, out result);
+		}
+
+		public static bool TrySetProperty<T>(this T instance, string property, object value)
+		{
+			return TypeInfo<T>.TrySetProperty(instance, property, value);
+		}
+
+		public static bool TrySetField<T>(this T instance, string field, object value)
+		{
+			return TypeInfo<T>.TrySetField(instance, field, value);
+		}
+
+		public static object Call<T>(this T instance, InvokeMemberBinder binder, IEnumerable<object> args)
+		{
+			return TypeInfo<T>.Call(instance, binder, args);
+		}
+
+		public static bool TryCall<T>(this T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result)
+		{
+			return TypeInfo<T>.TryCall(instance, binder, args, out result);
+		}
+	}
+
+	class TypeInfo<T>
     {
-        public static readonly ILookup<string, MethodCaller> Methods;
+        private static readonly ILookup<string, MethodCaller> Methods;
         private static readonly Dictionary<string, Lazy<Func<T, object>>> GetFields = new Dictionary<string, Lazy<Func<T, object>>>();
         private static readonly Dictionary<string, Lazy<Func<T, object>>> GetProperties = new Dictionary<string, Lazy<Func<T, object>>>();
         private static readonly Dictionary<string, Lazy<Action<T, object>>> SetFields = new Dictionary<string, Lazy<Action<T, object>>>();
