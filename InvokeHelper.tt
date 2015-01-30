@@ -36,9 +36,9 @@ namespace Invocation
 				switch(args.Length)
 				{
 	<# for (var i = 0; i <= invocationCount; i++)
-	{
-		var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
-		#>				case <#= i #>:
+{
+    var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
+    #>				case <#= i #>:
 						return ((dynamic)@delegate)(<#= args #>);
 
 	<# } #>
@@ -59,9 +59,9 @@ namespace Invocation
 				switch(args.Length)
 				{
 	<# for (var i = 0; i <= invocationCount; i++)
-	{
-		var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
-		#>				case <#= i #>:
+{
+    var args = string.Join(", ", Enumerable.Range(0, i).Select(x => "args[" + x + "]"));
+    #>				case <#= i #>:
 						((dynamic)@delegate)(<#= args #>);
 						break;
 

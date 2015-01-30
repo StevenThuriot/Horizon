@@ -1,4 +1,5 @@
 #region License
+
 //  
 // Copyright 2015 Steven Thuriot
 //  
@@ -14,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
+
 #endregion
 
 using System;
@@ -23,7 +25,6 @@ using System.Linq;
 
 namespace Invocation
 {
-
     static class CallerSelector
     {
         private static bool CompareParameters(IReadOnlyList<Argument> parameters,
@@ -39,8 +40,9 @@ namespace Invocation
                 var parameter = parameters[i];
 
                 var methodParam = parameter.HasName
-                                      ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
-                                      : selectableArguments.ElementAtOrDefault(i); //Unnamed params come first and in order, select by index.
+                    ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
+                    : selectableArguments.ElementAtOrDefault(i);
+                //Unnamed params come first and in order, select by index.
 
                 //Check if a param has been found.
                 if (methodParam == null) return false;
@@ -64,7 +66,8 @@ namespace Invocation
             return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
         }
 
-        public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+        public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args,
+                                                                     IEnumerable<MethodCaller> callers)
         {
             if (callers == null || !callers.Any())
                 return null;
@@ -114,10 +117,11 @@ namespace Invocation
             return caller.Call(arguments);
         }
 
-        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args,
+                                  IEnumerable<MethodCaller> callers)
         {
             var method = SelectMethod(binder, args, callers);
-            
+
             if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
 
             var caller = method.Item1;
@@ -126,7 +130,9 @@ namespace Invocation
 
             return caller.Call(arguments);
         }
-        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+
+        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args,
+                                   IEnumerable<MethodCaller> callers, out object result)
         {
             var method = SelectMethod(binder, args, callers);
 
@@ -143,7 +149,8 @@ namespace Invocation
             return true;
         }
 
-        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args,
+                                   IEnumerable<MethodCaller> callers, out object result)
         {
             var method = SelectMethod(binder, args, callers);
 

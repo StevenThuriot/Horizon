@@ -1,4 +1,5 @@
 ﻿#region License
+
 //  
 // Copyright 2015 Steven Thuriot
 //  
@@ -14,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
+
 #endregion
 
 using System;
@@ -43,9 +45,10 @@ namespace Invocation
 
             var lambda = Expression.Lambda(wrapper, "invoker", allParameters);
             var func = lambda.Compile();
-            
+
             return func;
         }
+
         public static T Build<T>(this MethodInfo method)
         {
             IEnumerable<ParameterExpression> allParameters;
@@ -77,9 +80,9 @@ namespace Invocation
 
 
             Expression wrapper;
-            if (method.ReturnType == typeof(void))
+            if (method.ReturnType == typeof (void))
             {
-                var returnLabel = Expression.Label(Expression.Label(typeof(object), "result"),
+                var returnLabel = Expression.Label(Expression.Label(typeof (object), "result"),
                                                    Expression.Constant(null));
 
                 wrapper = Expression.Block
@@ -127,11 +130,6 @@ namespace Invocation
         }
 
 
-
-
-
-
-
         public static Func<T, object> CreateGetter(FieldInfo info)
         {
             if (info.IsStatic)
@@ -139,7 +137,7 @@ namespace Invocation
 
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Field(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, typeof(object));
+            var boxExpression = Expression.Convert(memberExpression, typeof (object));
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
@@ -162,7 +160,7 @@ namespace Invocation
 
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Property(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, typeof(object));
+            var boxExpression = Expression.Convert(memberExpression, typeof (object));
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
@@ -179,9 +177,8 @@ namespace Invocation
         }
 
 
-
-
-        private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression, Type valueType)
+        private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression,
+                                                     Type valueType)
         {
             var value = Expression.Parameter(Constants.ObjectType, "value");
             var unboxedValue = Expression.Convert(value, valueType);
@@ -192,7 +189,7 @@ namespace Invocation
             return lambda.Compile();
         }
 
-        static bool IsStatic(PropertyInfo propertyInfo)
+        private static bool IsStatic(PropertyInfo propertyInfo)
         {
             return ((propertyInfo.CanRead && propertyInfo.GetMethod.IsStatic) ||
                     (propertyInfo.CanWrite && propertyInfo.SetMethod.IsStatic));

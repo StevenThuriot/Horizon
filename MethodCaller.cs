@@ -1,4 +1,5 @@
 #region License
+
 //  
 // Copyright 2015 Steven Thuriot
 //  
@@ -14,6 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
+
 #endregion
 
 using System;
@@ -48,7 +50,8 @@ namespace Invocation
             get { return _isAsync.Value; }
         }
 
-        public bool IsStatic {
+        public bool IsStatic
+        {
             get { return _info.IsStatic; }
         }
 
@@ -59,6 +62,7 @@ namespace Invocation
             if (obj.GetType() != GetType()) return false;
             return Equals((MethodCaller) obj);
         }
+
         protected bool Equals(MethodCaller other)
         {
             return string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
