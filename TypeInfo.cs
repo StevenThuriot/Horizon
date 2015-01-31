@@ -58,6 +58,16 @@ namespace Invocation
             return TypeInfo<T>.TryGetProperty(instance, field, out result);
         }
 
+        public static object GetIndexer<T>(this T instance, object[] indexes)
+        {
+            return TypeInfo<T>.GetIndexer(instance, indexes);
+        }
+
+        public static bool TryGetIndexer<T>(this T instance, object[] indexes, out object result)
+        {
+            return TypeInfo<T>.TryGetIndexer(instance, indexes, out result);
+        }
+
         public static bool TrySetProperty<T>(this T instance, string property, object value)
         {
             return TypeInfo<T>.TrySetProperty(instance, property, value);
@@ -66,6 +76,16 @@ namespace Invocation
         public static bool TrySetField<T>(this T instance, string field, object value)
         {
             return TypeInfo<T>.TrySetField(instance, field, value);
+        }
+
+        public static void SetIndexer<T>(this T instance, object[] indexes, object value)
+        {
+            TypeInfo<T>.SetIndexer(instance, indexes, value);
+        }
+
+        public static bool TrySetIndexer<T>(this T instance, object[] indexes, object value)
+        {
+            return TypeInfo<T>.TrySetIndexer(instance, indexes, value);
         }
 
         public static object Call<T>(this T instance, InvokeMemberBinder binder, IEnumerable<object> args)
@@ -179,6 +199,18 @@ namespace Invocation
             return false;
         }
 
+        public static object GetIndexer(T instance, object[] indexes)
+        {
+            var methods = Methods["get_Item"];
+            return CallerSelector.GetIndexer(instance, methods, indexes);
+        }
+
+        public static bool TryGetIndexer(T instance, object[] indexes, out object result)
+        {
+            var methods = Methods["get_Item"];
+            return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
+        }
+
         public static bool TrySetProperty(T instance, string property, object value)
         {
             Lazy<Action<T, object>> setter;
@@ -201,6 +233,18 @@ namespace Invocation
             }
 
             return false;
+        }
+
+        public static void SetIndexer(T instance, object[] indexes, object value)
+        {
+            var methods = Methods["set_Item"];
+            CallerSelector.SetIndexer(instance, methods, indexes, value);
+        }
+
+        public static bool TrySetIndexer(T instance, object[] indexes, object value)
+        {
+            var methods = Methods["set_Item"];
+            return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
         public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args)

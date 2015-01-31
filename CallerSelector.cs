@@ -75,9 +75,16 @@ namespace Invocation
             var arguments = args.ToList();
 
             //Build argument list from binder
-            var list = new List<Argument>();
             var names = new Stack<string>(binder.CallInfo.ArgumentNames);
 
+            return SelectMethod(callers, arguments, names);
+        }
+
+        public static Tuple<MethodCaller, List<object>> SelectMethod(IEnumerable<MethodCaller> callers,
+                                                                     IReadOnlyList<object> arguments,
+                                                                     Stack<string> names)
+        {
+            var list = new List<Argument>();
             //Named parameters can always be mapped directly on the last parameters.
             for (var i = arguments.Count - 1; i >= 0; i--)
             {
@@ -165,6 +172,75 @@ namespace Invocation
             arguments.Insert(0, instance);
 
             result = caller.Call(arguments);
+            return true;
+        }
+
+        public static object GetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes)
+        {
+            var method = SelectMethod(callers, indexes, new Stack<string>());
+
+            if (method == null) throw new ArgumentException("Invalid Indexer");
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+            arguments.Insert(0, instance);
+
+            return caller.Call(arguments);
+        }
+
+        public static void SetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
+        {
+            var input = indexes.ToList();
+            input.Add(value);
+
+            var method = SelectMethod(callers, input, new Stack<string>());
+
+            if (method == null) throw new ArgumentException("Invalid Indexer");
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+
+            arguments.Insert(0, instance);
+
+            caller.Call(arguments);
+        }
+
+        public static bool TryGetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes,
+                                         out object result)
+        {
+            var method = SelectMethod(callers, indexes, new Stack<string>());
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+            arguments.Insert(0, instance);
+
+            result = caller.Call(arguments);
+            return true;
+        }
+
+        public static bool TrySetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes,
+                                         object value)
+        {
+            var input = indexes.ToList();
+            input.Add(value);
+
+            var method = SelectMethod(callers, input, new Stack<string>());
+
+            if (method == null)
+                return false;
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+
+            arguments.Insert(0, instance);
+
+            caller.Call(arguments);
             return true;
         }
     }
