@@ -149,7 +149,7 @@ namespace Invocation
                 throw new NotSupportedException("Static fields are not supported.");
 
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
-            var memberExpression = Expression.Field(null, info);
+            var memberExpression = Expression.Field(parameter, info);
             return BuildSetter(parameter, memberExpression, info.FieldType);
         }
 
