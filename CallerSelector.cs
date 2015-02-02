@@ -28,7 +28,7 @@ namespace Invocation
     static class CallerSelector
     {
         private static bool CompareParameters(IReadOnlyList<Argument> parameters,
-                                              MethodCaller key, out IEnumerable<Argument> arguments)
+                                              MethodCaller key, out IEnumerable<SelectableArgument> arguments)
         {
             var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
                                          .ToList();
@@ -55,18 +55,17 @@ namespace Invocation
                 else
                 {
                     //If not null, parameter has to be assignable to 
-                    if (!methodParam.Type.IsAssignableFrom(parameter.Type)) return false;
+	                if (!parameter.IsAssignableTo(methodParam.Type)) return false;
                 }
 
                 //Override value with passed value
-                methodParam.Value = parameter.Value;
-                methodParam.Selected = true;
+                methodParam.SelectFor(parameter);
             }
 
             return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
         }
 
-        public static Tuple<MethodCaller, List<object>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args,
+        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args,
                                                                      IEnumerable<MethodCaller> callers)
         {
             if (callers == null || !callers.Any())
@@ -80,7 +79,7 @@ namespace Invocation
             return SelectMethod(callers, arguments, names);
         }
 
-        public static Tuple<MethodCaller, List<object>> SelectMethod(IEnumerable<MethodCaller> callers,
+        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<MethodCaller> callers,
                                                                      IReadOnlyList<object> arguments,
                                                                      Stack<string> names)
         {
@@ -98,7 +97,7 @@ namespace Invocation
                 list.Insert(0, arg);
             }
 
-            IEnumerable<Argument> actualArguments = null;
+            IEnumerable<SelectableArgument> actualArguments = null;
 
             //Compare argument list with relevant keys
             var selectedCaller = (from caller in callers
@@ -108,7 +107,7 @@ namespace Invocation
             if (selectedCaller == null)
                 return null;
 
-            return Tuple.Create(selectedCaller, actualArguments.Select(x => x.Value).ToList());
+            return Tuple.Create(selectedCaller, actualArguments.Select(x => x.GetValue()).ToList());
         }
 
 

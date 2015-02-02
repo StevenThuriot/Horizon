@@ -18,12 +18,16 @@
 
 #endregion
 
+using System;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace Invocation
 {
     class SelectableArgument : Argument
     {
+        private Type _actualType;
+
         public SelectableArgument(ParameterInfo parameterInfo)
             : base(
                 parameterInfo.Name, parameterInfo.HasDefaultValue ? parameterInfo.DefaultValue : null,
@@ -34,6 +38,49 @@ namespace Invocation
 
         public bool HasDefaultValue { get; private set; }
 
-        public bool Selected { get; set; }
+        public bool Selected { get; private set; }
+
+        public void SelectFor(Type type)
+        {
+            _actualType = type;
+            Selected = true;
+        }
+
+
+        public dynamic GetValue()
+        {
+            var outType = Type;
+
+            if (outType == null) return false;
+
+            var value = Value;
+            if (_actualType.IsAssignableFrom(outType)) return value;
+
+            if (ReferenceEquals(null, value))
+                return null;
+
+            var converter = TypeDescriptor.GetConverter(_actualType);
+            if (converter.CanConvertTo(outType))
+                return converter.ConvertTo(value, outType);
+
+            converter = TypeDescriptor.GetConverter(outType);
+            if (converter.CanConvertFrom(_actualType))
+                return converter.ConvertFrom(value);
+
+            
+            dynamic dynamicValue = value;
+            dynamic result;
+
+            if (TypeInfo.TryImplicitConvert(dynamicValue, Type, out result))
+                return result;
+
+            return value;
+        }
+
+        public void SelectFor(Argument parameter)
+        {
+            Value = parameter.Value;
+            SelectFor(parameter.Type);
+        }
     }
 }

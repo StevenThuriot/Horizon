@@ -98,6 +98,20 @@ namespace Invocation
         {
             return TypeInfo<T>.TryCall(instance, binder, args, out result);
         }
+
+
+        public static bool CanImplicitConvert<T>(this T instance, Type type)
+        {
+            return TypeInfo<T>.CanImplicitConvert(instance, type);
+        }
+        public static dynamic ImplicitConvert<T>(this T instance, Type type)
+        {
+            return TypeInfo<T>.ImplicitConvert(instance, type);
+        }
+        public static bool TryImplicitConvert<T>(this T instance, Type type, out dynamic result)
+        {
+            return TypeInfo<T>.TryImplicitConvert(instance, type, out result);
+        }
     }
 
     class TypeInfo<T>
@@ -305,6 +319,55 @@ namespace Invocation
         public static bool HasMethod(string method)
         {
             return Methods.Contains(method);
+        }
+
+
+
+
+
+
+
+
+        public static bool CanImplicitConvert(T instance, Type type)
+        {
+            var method = Findop_Implicit(type);
+            return method != null;
+        }
+
+        public static dynamic ImplicitConvert(T instance, Type type)
+        {
+            var method = Findop_Implicit(type);
+
+            if (method == null) throw new ArgumentException("Invalid implicit conversion");
+
+            var arguments = new dynamic[] { instance };
+            return method.Call(arguments);
+        }
+
+        public static bool TryImplicitConvert(T instance, Type type, out dynamic result)
+        {
+            var methods = Methods["op_Implicit"];
+            var method = methods.FirstOrDefault(n => n.ReturnType == type && n.ParameterTypes[0].ParameterType == Constants.Typed<T>.OwnerType);
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var arguments = new dynamic[] { instance };
+
+            result = method.Call(arguments);
+            return true;
+        }
+
+        private static MethodCaller Findop_Implicit(Type type)
+        {
+            var methods = Methods["op_Implicit"];
+            var owner = Constants.Typed<T>.OwnerType;
+            var method = methods.FirstOrDefault(x => x.ReturnType == type && x.ParameterTypes[0].ParameterType == owner);
+
+            return method;
         }
     }
 }

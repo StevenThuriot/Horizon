@@ -55,6 +55,12 @@ namespace Invocation
             get { return _info.IsStatic; }
         }
 
+        public Type ReturnType
+        {
+            get { return _info.ReturnType; }
+        }
+
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;

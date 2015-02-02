@@ -1,5 +1,4 @@
 ﻿#region License
-
 //  
 // Copyright 2015 Steven Thuriot
 //  
@@ -15,38 +14,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // 
-
 #endregion
 
 using System;
+using System.ComponentModel;
 
 namespace Invocation
 {
-    class Argument
-    {
-        public readonly string Name;
-        public readonly Type Type;
+	class Argument
+	{
+		public readonly string Name;
+		public readonly Type Type;
 
-        public Argument(string name, object value, Type type = null)
+		public Argument(string name, object value, Type type = null)
+		{
+			Name = name;
+			Value = value;
+
+			if (type != null)
+			{
+				Type = type;
+			}
+			else if (value != null)
+			{
+				Type = value.GetType();
+			}
+		}
+
+		public object Value { get; set; }
+
+		public bool HasName
+		{
+			get { return !string.IsNullOrWhiteSpace(Name); }
+		}
+
+		public bool IsAssignableTo(Type type)
         {
-            Name = name;
-            Value = value;
+            var inType = Type;
+            if (inType == null) return false;
+            
+            if (type.IsAssignableFrom(inType)) return true;
+            
+			var converter = TypeDescriptor.GetConverter(inType);
+			if (converter.CanConvertTo(type))
+				return true;
 
-            if (type != null)
-            {
-                Type = type;
-            }
-            else if (value != null)
-            {
-                Type = value.GetType();
-            }
-        }
+			converter = TypeDescriptor.GetConverter(type);
+			if (converter.CanConvertFrom(inType))
+				return true;
 
-        public object Value { get; set; }
+		    var value = Value;
+		    if (ReferenceEquals(null, value)) return false;
+            
 
-        public bool HasName
-        {
-            get { return !string.IsNullOrWhiteSpace(Name); }
-        }
-    }
+		    //Resolve T through DLR
+		    dynamic dynamicValue = value;
+		    return TypeInfo.CanImplicitConvert(dynamicValue, type);
+		}
+	}
 }
