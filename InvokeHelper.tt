@@ -27,9 +27,9 @@ using System.Runtime.ExceptionServices;
 
 namespace Invocation
 {
-    public static partial class InvokeHelper
+    partial class InvokeHelper
     {
-		public static object FastInvoke(this Delegate @delegate, dynamic[] args)
+		public static object FastInvoke(this Delegate @delegate, params dynamic[] args)
 		{
             if (@delegate.Method.ReturnType != typeof (void))
             {

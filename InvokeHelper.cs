@@ -26,7 +26,7 @@ using System.Reflection;
 
 namespace Invocation
 {
-    partial class InvokeHelper
+	public static partial class InvokeHelper
     {
         public static Lazy<Delegate> BuildLazy(this MethodInfo method)
         {
