@@ -18,6 +18,9 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 
 namespace Invocation
 {
@@ -52,8 +55,16 @@ namespace Invocation
         {
             var inType = Type;
             if (inType == null) return false;
-            
-            if (type.IsAssignableFrom(inType)) return true;
+
+		    if (type.IsGenericTypeDefinition && inType.IsGenericType)
+		    {
+		        Debugger.Break();
+		        var arguments = inType.GetGenericArguments();
+		        type = type.MakeGenericType(arguments);
+		    }
+
+
+		    if (type.IsAssignableFrom(inType)) return true;
             
 			var converter = TypeDescriptor.GetConverter(inType);
 			if (converter.CanConvertTo(type))

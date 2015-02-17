@@ -159,7 +159,7 @@ namespace Invocation
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
                     var methodInfo = (MethodInfo) member;
-                    var caller = new MethodCaller(methodInfo);
+                    var caller = MethodCaller.Create(methodInfo);
                     methods.Add(caller);
                 }
             }

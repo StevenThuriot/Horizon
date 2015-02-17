@@ -28,10 +28,8 @@ namespace Invocation
     {
         private Type _actualType;
 
-        public SelectableArgument(ParameterInfo parameterInfo)
-            : base(
-                parameterInfo.Name, parameterInfo.HasDefaultValue ? parameterInfo.DefaultValue : null,
-                parameterInfo.ParameterType)
+        public SelectableArgument(SimpleParameterInfo parameterInfo)
+            : base(parameterInfo.Name, parameterInfo.DefaultValue, parameterInfo.ParameterType)
         {
             HasDefaultValue = parameterInfo.HasDefaultValue;
         }

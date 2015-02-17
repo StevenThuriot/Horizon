@@ -28,21 +28,34 @@ namespace Invocation
 {
     class MethodCaller
     {
+        public static MethodCaller Create(MethodInfo info)
+        {
+            if (info.IsGenericMethodDefinition)
+                return new GenericMethodCaller(info);
+
+            return new MethodCaller(info);
+        }
+
+
         public readonly string Name;
-        public readonly IReadOnlyList<ParameterInfo> ParameterTypes;
+        public readonly IReadOnlyList<SimpleParameterInfo> ParameterTypes;
         private readonly Lazy<Delegate> _caller;
-        private readonly MethodInfo _info;
         private readonly Lazy<bool> _isAsync;
 
-        public MethodCaller(MethodInfo info)
-        {
-            _info = info;
-            Name = info.Name;
-            var parameterTypes = info.GetParameters();
-            ParameterTypes = parameterTypes;
-            _caller = info.BuildLazy();
+        protected readonly MethodInfo Info;
 
-            _isAsync = new Lazy<bool>(() => typeof (Task).IsAssignableFrom(info.ReturnType));
+        internal MethodCaller(MethodInfo info)
+            :this(info, info.GetParameters().Select(x =>new SimpleParameterInfo(x)))
+        {
+            _caller = info.BuildLazy();
+        }
+
+        protected MethodCaller(MethodInfo info, IEnumerable<SimpleParameterInfo> parameterTypes)
+        {
+            Info = info;
+            Name = info.Name;
+            ParameterTypes = parameterTypes.ToArray();
+            _isAsync = new Lazy<bool>(() => typeof(Task).IsAssignableFrom(info.ReturnType));
         }
 
         public bool IsAsync
@@ -52,12 +65,12 @@ namespace Invocation
 
         public bool IsStatic
         {
-            get { return _info.IsStatic; }
+            get { return Info.IsStatic; }
         }
 
         public Type ReturnType
         {
-            get { return _info.ReturnType; }
+            get { return Info.ReturnType; }
         }
 
 
@@ -83,7 +96,7 @@ namespace Invocation
         }
 
 
-        public object Call(IEnumerable<dynamic> values)
+        public virtual object Call(IEnumerable<dynamic> values)
         {
             var arguments = values.ToArray();
             return _caller.Value.FastInvoke(arguments);

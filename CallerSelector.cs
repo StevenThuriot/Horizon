@@ -132,7 +132,9 @@ namespace Invocation
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
-            arguments.Insert(0, new Argument("instance", instance));
+            
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             return caller.Call(arguments);
         }
@@ -168,7 +170,9 @@ namespace Invocation
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
-            arguments.Insert(0, instance);
+
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             result = caller.Call(arguments);
             return true;
@@ -182,7 +186,9 @@ namespace Invocation
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
-            arguments.Insert(0, instance);
+
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             return caller.Call(arguments);
         }
@@ -199,7 +205,8 @@ namespace Invocation
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
 
-            arguments.Insert(0, instance);
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             caller.Call(arguments);
         }
@@ -217,7 +224,9 @@ namespace Invocation
 
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
-            arguments.Insert(0, instance);
+
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             result = caller.Call(arguments);
             return true;
@@ -237,7 +246,8 @@ namespace Invocation
             var caller = method.Item1;
             var arguments = method.Item2.ToList();
 
-            arguments.Insert(0, instance);
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
 
             caller.Call(arguments);
             return true;
