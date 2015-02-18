@@ -20,12 +20,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Invocation
 {
+    [DebuggerDisplay("{GetType().Name} - {Info.ToString()}")]
     class MethodCaller
     {
         public static MethodCaller Create(MethodInfo info)

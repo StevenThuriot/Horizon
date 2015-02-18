@@ -163,8 +163,9 @@ namespace Invocation
                     methods.Add(caller);
                 }
             }
-
-            Methods = methods.ToLookup(x => x.Name, x => x);
+            
+            Methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
+                             .ToLookup(x => x.Name, x => x);
         }
 
         public static object GetProperty(T instance, string property)
