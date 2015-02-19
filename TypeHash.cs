@@ -33,6 +33,11 @@ namespace Invocation
             _types = types.ToArray();
         }
 
+        public IReadOnlyList<Type> Types
+        {
+            get { return _types; }
+        }
+
         public bool Equals(TypeHash other)
         {
             //if (_types == null)

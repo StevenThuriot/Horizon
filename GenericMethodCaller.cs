@@ -20,10 +20,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.NetworkInformation;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Invocation
@@ -33,7 +32,7 @@ namespace Invocation
         private readonly Dictionary<TypeHash, Delegate> _cache = new Dictionary<TypeHash, Delegate>();
 
         internal GenericMethodCaller(MethodInfo info)
-            : base(info, GetParameters(info))
+            : base(info.GetGenericMethodDefinition(), GetParameters(info))
         {
         }
 
@@ -65,80 +64,21 @@ namespace Invocation
 
         public override object Call(IEnumerable<dynamic> values)
         {
-            var genericArguments = Info.GetGenericArguments();
-            
-            var types = genericArguments.Select(x => FindTypeFor(x, values))
-                                        .ToArray();
+            var arguments = values.ToArray();
+
+            var types = arguments.Cast<object>()
+                                 .Select(x => ReferenceEquals(null, x) ? typeof (object) : x.GetType());
 
             var hash = new TypeHash(types);
 
             Delegate @delegate;
             if (!_cache.TryGetValue(hash, out @delegate))
             {
-                var caller = Info.MakeGenericMethod(types);
-                @delegate = caller.Build();
+                @delegate = Info.BuildCallSite(arguments);
                 _cache[hash] = @delegate;
             }
-            
-            var arguments = values.ToArray();
+
             return @delegate.FastInvoke(arguments);
-        }
-
-        private Type FindTypeFor(Type type, IEnumerable<object> values)
-        {
-            for (int i = 0; i < ParameterTypes.Count; i++)
-            {
-                var spi = ParameterTypes[i];
-                var originalType = spi.OriginalParameterType;
-
-                if (originalType == spi.ParameterType) continue; //Not it!
-
-                var value = values.ElementAt(i);
-                var valueType = value == null ? typeof(object) : value.GetType();
-
-                Type genericType;
-                if (CheckGeneric(type, originalType, valueType, out genericType))
-                {
-                    return genericType;
-                }
-            }
-            
-            Debugger.Break();
-            throw new NotSupportedException();
-        }
-
-        private static bool CheckGeneric(Type type, Type originalType, Type valueType, out Type genericType)
-        {
-            if (type == originalType)
-            {
-                genericType = valueType;
-                return true;
-            }
-
-            var parameters = originalType.GetGenericArguments();
-            var vparameters = valueType.GetGenericArguments();
-
-            if (parameters.Length == 0 || vparameters.Length != parameters.Length)
-            {
-                genericType = null;
-                return false;
-            }
-
-            for (var i = 0; i < parameters.Length; i++)
-            {
-                var parameter = parameters[i];
-                var vparam = vparameters[i];
-
-                Type sub;
-                if (CheckGeneric(type, parameter, vparam, out sub))
-                {
-                    genericType = sub;
-                    return true;
-                }
-            }
-
-            genericType = null;
-            return false;
         }
     }
 }
