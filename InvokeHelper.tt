@@ -1,9 +1,4 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
-<#@ assembly name="System.Core" #>
-<#@ import namespace="System.Linq" #>
-<#@ output extension=".g.cs" #>
-<# const int invocationCount = 11; #>
-#region License
+﻿#region License
 //  
 // Copyright 2015 Steven Thuriot
 //  
@@ -20,18 +15,26 @@
 // limitations under the License.
 // 
 #endregion
-
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".g.cs" #>
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
-
+<# var invocationCount =
+                AppDomain.CurrentDomain.GetAssemblies()
+                         .SelectMany(x => x.GetTypes())
+                         .Where(x => x.Name.StartsWith("Func`"))
+                         .Max(x => x.GetGenericArguments().Length) - 2; #>
 namespace Invocation
 {
     partial class InvokeHelper
     {
 		public static object FastInvoke(this Delegate @delegate, params dynamic[] args)
 		{
-            if (@delegate.Method.ReturnType != typeof (void))
+            if (@delegate.Method.ReturnType != Constants.VoidType)
             {
 				switch(args.Length)
 				{
@@ -83,5 +86,48 @@ namespace Invocation
 			
 			throw new NotSupportedException("Invocation failure");
 		}
+
+
+
+	    private static Type ResolveSignature(MethodInfo method, int argumentCounter)
+	    {
+	        var hasReturnType = method.ReturnType != Constants.VoidType;
+
+	        if (method.IsStatic)
+	        {
+	            switch (argumentCounter)
+	            {
+	<# for (var i = 0; i < invocationCount; i++)
+{
+    var args = string.Join("", Enumerable.Range(0, i).Select(x => ", object"));
+    #>				case <#= i #>:
+						return hasReturnType
+	                        ? typeof (Func<CallSite, Type, object<#= args #>>)
+	                        : typeof (Action<CallSite, Type<#= args #>>);
+
+	<# } #>
+
+	                default:
+	                    throw new NotSupportedException("Too many arguments.");
+	            }
+	        }
+
+
+	        switch (argumentCounter)
+	        {
+	<# for (var i = 0; i <= invocationCount; i++)
+{
+    var args = string.Join("", Enumerable.Range(0, i).Select(x => ", object"));
+    #>				case <#= i #>:
+						return hasReturnType
+							? typeof (Func<CallSite, object<#= args #>>)
+							: typeof (Action<CallSite<#= args #>>);
+
+	<# } #>
+
+	            default:
+	                throw new NotSupportedException("Too many arguments.");
+	        }
+	    }
 	}
 }

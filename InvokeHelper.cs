@@ -203,64 +203,6 @@ namespace Invocation
 
 	        return d;
         }
-
-	    private static Type ResolveSignature(MethodInfo method, int argumentCounter)
-	    {
-            //TODO: move to T4
-	        var hasReturnType = method.ReturnType != Constants.VoidType;
-
-	        if (method.IsStatic)
-	        {
-	            switch (argumentCounter)
-	            {
-	                case 0:
-	                    return hasReturnType
-	                        ? typeof (Func<CallSite, Type, object>)
-	                        : typeof (Action<CallSite, Type>);
-	                case 1:
-                        return hasReturnType
-	                        ? typeof (Func<CallSite, Type, object, object>)
-	                        : typeof (Action<CallSite, Type, object>);
-	                case 2:
-                        return hasReturnType
-	                        ? typeof (Func<CallSite, Type, object, object, object>)
-	                        : typeof (Action<CallSite, Type, object, object>);
-	                case 3:
-                        return hasReturnType
-	                        ? typeof (Func<CallSite, Type, object, object, object, object>)
-	                        : typeof (Action<CallSite, Type, object, object, object>);
-	                    //TODO: Add more
-
-	                default:
-	                    throw new NotSupportedException();
-	            }
-	        }
-
-
-	        switch (argumentCounter)
-	        {
-	            case 0:
-	                return hasReturnType
-	                    ? typeof (Func<CallSite, object>)
-	                    : typeof (Action<CallSite>);
-	            case 1:
-	                return hasReturnType
-	                    ? typeof (Func<CallSite, object, object>)
-	                    : typeof (Action<CallSite, object>);
-	            case 2:
-	                return hasReturnType
-	                    ? typeof (Func<CallSite, object, object, object>)
-	                    : typeof (Action<CallSite, object, object>);
-	            case 3:
-	                return hasReturnType
-	                    ? typeof (Func<CallSite, object, object, object, object>)
-	                    : typeof (Action<CallSite, object, object, object>);
-	                //TODO: Add more
-
-	            default:
-	                throw new NotSupportedException();
-	        }
-	    }
     }
 
     static class InvokeHelper<T>
