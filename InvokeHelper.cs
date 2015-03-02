@@ -109,50 +109,7 @@ namespace Invocation
             return wrapper;
         }
 
-
-
         
-        //TODO: While this is much simpler, I haven't gotten it to work with static methods yet.
-        //public static Delegate BuildCallSite(this MethodInfo method, IEnumerable<object> variables)
-        //{
-        //    var parameters = variables.Select(x => ReferenceEquals(null, x) ? Constants.ObjectType : x.GetType())
-        //                              .Select(Expression.Parameter)
-        //                              .ToList();
-
-        //    var callFlag = CSharpArgumentInfoFlags.None;
-	        
-        //    if (method.IsStatic)
-        //        callFlag = callFlag | CSharpArgumentInfoFlags.IsStaticType;
-
-        //    var argumentInfo = new List<CSharpArgumentInfo>
-        //                       {
-        //                           CSharpArgumentInfo.Create(callFlag, null)
-        //                       };
-            
-        //    for (var i = 0; i < parameters.Count; i++)
-        //    {
-        //        //TODO: Attempt to resolve flags:
-        //        //IsRef             CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.IsRef, null)
-        //        //IsOut             CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.IsOut, null)
-        //        //NamedArgument     CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.NamedArgument, "the name goes here")
-        //        var argument = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null);
-        //        argumentInfo.Add(argument);
-        //    }
-            
-        //    var hasReturnType = method.ReturnType != Constants.VoidType;
-
-        //    var binderFlags = hasReturnType ? CSharpBinderFlags.None : CSharpBinderFlags.ResultDiscarded;
-        //    var callSiteBinder = Binder.InvokeMember(binderFlags, method.Name, null, method.DeclaringType, argumentInfo);
-            
-        //    var call = Expression.Dynamic(callSiteBinder, method.ReturnType, parameters);
-            
-        //    var lambda = Expression.Lambda(call, parameters);
-        //    var d = lambda.Compile();
-
-        //    return d;
-        //}
-
-
 	    public static Delegate BuildCallSite(this MethodInfo method, IEnumerable<object> variables)
         {
             var argumentCounter = variables.Count();

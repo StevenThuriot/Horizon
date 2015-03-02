@@ -20,7 +20,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace Invocation
 {
@@ -51,18 +50,29 @@ namespace Invocation
 
             if (outType == null) return false;
 
+            var actualType = _actualType;
+
+            if (outType.IsGenericTypeDefinition)
+            {
+                Type[] genericParameters;
+                if (actualType.IsGenericTypeOf(outType, out genericParameters))
+                {
+                    outType = outType.GetGenericTypeDefinition().MakeGenericType(genericParameters);
+                }
+            }
+
             var value = Value;
-            if (_actualType.IsAssignableFrom(outType)) return value;
+            if (outType.IsAssignableFrom(actualType)) return value;
 
             if (ReferenceEquals(null, value))
                 return null;
 
-            var converter = TypeDescriptor.GetConverter(_actualType);
+            var converter = TypeDescriptor.GetConverter(actualType);
             if (converter.CanConvertTo(outType))
                 return converter.ConvertTo(value, outType);
 
             converter = TypeDescriptor.GetConverter(outType);
-            if (converter.CanConvertFrom(_actualType))
+            if (converter.CanConvertFrom(actualType))
                 return converter.ConvertFrom(value);
 
             

@@ -18,9 +18,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 
 namespace Invocation
 {
@@ -51,27 +48,23 @@ namespace Invocation
 			get { return !string.IsNullOrWhiteSpace(Name); }
 		}
 
-		public bool IsAssignableTo(Type type)
+		public bool IsAssignableTo(Type parameterType)
         {
-            var inType = Type;
-            if (inType == null) return false;
+            var actualType = Type;
+            if (actualType == null) return false;
 
-		    if (type.IsGenericTypeDefinition && inType.IsGenericType)
-		    {
-		        Debugger.Break();
-		        var arguments = inType.GetGenericArguments();
-		        type = type.MakeGenericType(arguments);
-		    }
+		    if (parameterType.IsGenericTypeDefinition && actualType.IsGenericType)
+		        return actualType.IsGenericTypeOf(parameterType);
 
 
-		    if (type.IsAssignableFrom(inType)) return true;
+		    if (parameterType.IsAssignableFrom(actualType)) return true;
             
-			var converter = TypeDescriptor.GetConverter(inType);
-			if (converter.CanConvertTo(type))
+			var converter = TypeDescriptor.GetConverter(actualType);
+			if (converter.CanConvertTo(parameterType))
 				return true;
 
-			converter = TypeDescriptor.GetConverter(type);
-			if (converter.CanConvertFrom(inType))
+			converter = TypeDescriptor.GetConverter(parameterType);
+			if (converter.CanConvertFrom(actualType))
 				return true;
 
 		    var value = Value;
@@ -80,7 +73,7 @@ namespace Invocation
 
 		    //Resolve T through DLR
 		    dynamic dynamicValue = value;
-		    return TypeInfo.CanImplicitConvert(dynamicValue, type);
+		    return TypeInfo.CanImplicitConvert(dynamicValue, parameterType);
 		}
 	}
 }

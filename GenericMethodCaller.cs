@@ -20,9 +20,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Invocation
@@ -48,15 +46,8 @@ namespace Invocation
 
                 var genericTypeDefinition = type;
 
-                if (!type.IsGenericParameter)
-                {
-                    if (type.ContainsGenericParameters)
-                    {
-                        Debugger.Break();
-                        genericTypeDefinition = type.GetGenericTypeDefinition();
-                        
-                    }
-                }
+                if (!type.IsGenericParameter && type.ContainsGenericParameters)
+                    genericTypeDefinition = type.GetGenericTypeDefinition();
 
                 yield return new SimpleParameterInfo(name, defaultValue, genericTypeDefinition, type, hasDefaultValue); ;
             }
