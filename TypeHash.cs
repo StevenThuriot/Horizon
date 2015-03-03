@@ -27,10 +27,13 @@ namespace Invocation
     struct TypeHash
     {
         private readonly Type[] _types;
+        private readonly Lazy<int> _hashCode;
+
 
         public TypeHash(IEnumerable<Type> types)
         {
-            _types = types.ToArray();
+            var typeArray = _types = types.ToArray();
+            _hashCode = new Lazy<int>(() => unchecked(typeArray.Aggregate(17, (current, element) => current*31 + element.GetHashCode())));
         }
 
         public IReadOnlyList<Type> Types
@@ -40,18 +43,11 @@ namespace Invocation
 
         public bool Equals(TypeHash other)
         {
-            //if (_types == null)
-            //    return other._types == null;
-
-            //if (other._types == null)
-            //    return false;
-
             return _types.SequenceEqual(other._types);
         }
 
         public override bool Equals(object obj)
         {
-            //if (ReferenceEquals(null, obj)) return false;
             return obj is TypeHash && Equals((TypeHash) obj);
         }
 
@@ -64,17 +60,10 @@ namespace Invocation
         {
             return !Equals(left, right);
         }
-
+        
         public override int GetHashCode()
         {
-            unchecked
-            {
-                //if (_types == null)
-                //    return 0;
-
-                var elementComparer = EqualityComparer<Type>.Default;
-                return _types.Aggregate(17, (current, element) => current*31 + elementComparer.GetHashCode(element));
-            }
+            return _hashCode.Value;
         }
     }
 }
