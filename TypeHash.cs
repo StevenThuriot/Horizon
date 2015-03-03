@@ -53,12 +53,12 @@ namespace Invocation
 
         public static bool operator ==(TypeHash left, TypeHash right)
         {
-            return Equals(left, right);
+            return left.Equals(right);
         }
 
         public static bool operator !=(TypeHash left, TypeHash right)
         {
-            return !Equals(left, right);
+            return !left.Equals(right);
         }
         
         public override int GetHashCode()
