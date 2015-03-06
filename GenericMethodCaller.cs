@@ -58,7 +58,7 @@ namespace Invocation
             var arguments = values.ToArray();
 
             var types = arguments.Cast<object>()
-                                 .Select(x => ReferenceEquals(null, x) ? typeof (object) : x.GetType());
+                                 .Select(x => Reference.IsNull(x) ? typeof (object) : x.GetType());
 
             var hash = new TypeHash(types);
 

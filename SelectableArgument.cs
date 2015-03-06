@@ -64,7 +64,7 @@ namespace Invocation
             var value = Value;
             if (outType.IsAssignableFrom(actualType)) return value;
 
-            if (ReferenceEquals(null, value))
+            if (Reference.IsNull(value))
                 return null;
 
             var converter = TypeDescriptor.GetConverter(actualType);

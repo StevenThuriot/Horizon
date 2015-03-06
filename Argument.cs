@@ -68,7 +68,7 @@ namespace Invocation
 				return true;
 
 		    var value = Value;
-		    if (ReferenceEquals(null, value)) return false;
+		    if (Reference.IsNull(value)) return false;
             
 
 		    //Resolve T through DLR

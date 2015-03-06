@@ -114,7 +114,7 @@ namespace Invocation
         }
     }
 
-    class TypeInfo<T>
+    static class TypeInfo<T>
     {
         private static readonly ILookup<string, MethodCaller> Methods;
 
