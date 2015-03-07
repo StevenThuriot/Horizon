@@ -65,8 +65,18 @@ namespace Invocation
             return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
         }
 
-        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args,
-                                                                     IEnumerable<MethodCaller> callers)
+
+        private static readonly Stack<string> EmptyStack = new Stack<string>(); 
+        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+        {
+            if (callers == null || !callers.Any())
+                return null;
+
+            var arguments = args.ToList();
+            return SelectMethod(callers, arguments, EmptyStack);
+        }
+
+        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
             if (callers == null || !callers.Any())
                 return null;
@@ -79,18 +89,16 @@ namespace Invocation
             return SelectMethod(callers, arguments, names);
         }
 
-        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<MethodCaller> callers,
-                                                                     IReadOnlyList<object> arguments,
-                                                                     Stack<string> names)
+         static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<MethodCaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
         {
             var list = new List<Argument>();
             //Named parameters can always be mapped directly on the last parameters.
-            for (var i = arguments.Count - 1; i >= 0; i--)
+            for (var i = arguments.Count - 1; i != -1; i--)
             {
                 var argument = arguments[i];
                 string name = null;
 
-                if (names.Count > 0)
+                if (names.Count != 0)
                     name = names.Pop();
 
                 var arg = new Argument(name, argument);
@@ -123,8 +131,7 @@ namespace Invocation
             return caller.Call(arguments);
         }
 
-        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args,
-                                  IEnumerable<MethodCaller> callers)
+        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
         {
             var method = SelectMethod(binder, args, callers);
 
@@ -139,8 +146,7 @@ namespace Invocation
             return caller.Call(arguments);
         }
 
-        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args,
-                                   IEnumerable<MethodCaller> callers, out object result)
+        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
         {
             var method = SelectMethod(binder, args, callers);
 
@@ -157,10 +163,72 @@ namespace Invocation
             return true;
         }
 
-        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args,
-                                   IEnumerable<MethodCaller> callers, out object result)
+        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
         {
             var method = SelectMethod(binder, args, callers);
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
+
+            result = caller.Call(arguments);
+            return true;
+        }
+        public static object Call(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+        {
+            var method = SelectMethod(args, callers);
+
+            if (method == null) throw new ArgumentException("Invalid methodcall.");
+
+            var caller = method.Item1;
+            var arguments = method.Item2;
+
+            return caller.Call(arguments);
+        }
+
+        public static object Call(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+        {
+            var method = SelectMethod(args, callers);
+
+            if (method == null) throw new ArgumentException("Invalid methodcall.");
+
+            var caller = method.Item1;
+            var arguments = method.Item2.ToList();
+            
+            if (!caller.IsStatic)
+                arguments.Insert(0, instance);
+
+            return caller.Call(arguments);
+        }
+
+        public static bool TryCall(IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+        {
+            var method = SelectMethod(args, callers);
+
+            if (method == null)
+            {
+                result = null;
+                return false;
+            }
+
+            var caller = method.Item1;
+            var arguments = method.Item2;
+
+            result = caller.Call(arguments);
+            return true;
+        }
+
+        public static bool TryCall(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+        {
+            var method = SelectMethod(args, callers);
 
             if (method == null)
             {
