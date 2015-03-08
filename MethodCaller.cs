@@ -48,7 +48,7 @@ namespace Invocation
         protected readonly MethodInfo Info;
 
         internal MethodCaller(MethodInfo info)
-            :this(info, info.GetParameters().Select(x =>new SimpleParameterInfo(x)))
+            : this(info, info.GetParameters().Select(x =>new SimpleParameterInfo(x)))
         {
             _caller = info.BuildLazy();
         }

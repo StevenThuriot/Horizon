@@ -257,6 +257,11 @@ namespace Invocation
         {
             return Methods.Contains(method);
         }
+        
+        public static IEnumerable<MethodCaller> GetMethod(string method)
+        {
+            return Methods[method];
+        }
 
 
 
