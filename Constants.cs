@@ -32,7 +32,8 @@ namespace Invocation
         public static readonly Type IntegerType = typeof (int);
         public static readonly Type ObjectType = typeof (object);
         public static readonly Type ObjectArrayType = typeof (object[]);
-        public static readonly Type VoidType = typeof (void);
+        public static readonly Type VoidType = typeof(void);
+        public static readonly Type GenericDictionaryDefinition = typeof(IDictionary<,>);
 
         internal class Typed<T>
         {
