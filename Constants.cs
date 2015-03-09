@@ -41,19 +41,22 @@ namespace Invocation
             public static readonly IReadOnlyCollection<Type> ArgTypes = new[] {OwnerType, ObjectArrayType};
 
             private static bool? _isGenericDictionary;
-            public static bool IsGenericDictionary()
+            public static bool IsGenericDictionary
             {
-                if (_isGenericDictionary.HasValue)
-                    return _isGenericDictionary.Value;
-
-                if (OwnerType.GetInterface(GenericDictionaryDefinition.Name) == null)
+                get
                 {
-                    _isGenericDictionary = false;
-                    return false;
-                }
+                    if (_isGenericDictionary.HasValue)
+                        return _isGenericDictionary.Value;
 
-                _isGenericDictionary = true;
-                return true;
+                    if (OwnerType.GetInterface(GenericDictionaryDefinition.Name) == null)
+                    {
+                        _isGenericDictionary = false;
+                        return false;
+                    }
+
+                    _isGenericDictionary = true;
+                    return true;
+                }
             }
         }
     }
