@@ -39,6 +39,22 @@ namespace Invocation
         {
             public static readonly Type OwnerType = typeof (T);
             public static readonly IReadOnlyCollection<Type> ArgTypes = new[] {OwnerType, ObjectArrayType};
+
+            private static bool? _isGenericDictionary;
+            public static bool IsGenericDictionary()
+            {
+                if (_isGenericDictionary.HasValue)
+                    return _isGenericDictionary.Value;
+
+                if (OwnerType.GetInterface(GenericDictionaryDefinition.Name) == null)
+                {
+                    _isGenericDictionary = false;
+                    return false;
+                }
+
+                _isGenericDictionary = true;
+                return true;
+            }
         }
     }
 }
