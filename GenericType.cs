@@ -21,7 +21,7 @@
 using System;
 using System.Linq;
 
-namespace Invocation
+namespace Horizon
 {
     static class GenericType
     {

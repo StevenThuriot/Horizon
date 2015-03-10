@@ -1,2 +1,2 @@
-# Invoker
-Fast .NET method invoker.
+# Horizon
+.NET Fast Very Late Binding invoker

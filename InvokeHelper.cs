@@ -27,7 +27,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CSharp.RuntimeBinder;
 using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
-namespace Invocation
+namespace Horizon
 {
 	public static partial class InvokeHelper
     {
@@ -83,9 +83,9 @@ namespace Invocation
 
 
             Expression wrapper;
-            if (method.ReturnType == typeof (void))
+            if (method.ReturnType == Constants.VoidType)
             {
-                var returnLabel = Expression.Label(Expression.Label(typeof (object), "result"),
+                var returnLabel = Expression.Label(Expression.Label(Constants.ObjectType, "result"),
                                                    Expression.Constant(null));
 
                 wrapper = Expression.Block
@@ -134,7 +134,7 @@ namespace Invocation
                 var argument = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null);
                 argumentInfo.Add(argument);
             }
-            var hasReturnType = method.ReturnType != typeof(void);
+            var hasReturnType = method.ReturnType != Constants.VoidType;
 
 	        var binderFlags = hasReturnType ? CSharpBinderFlags.None : CSharpBinderFlags.ResultDiscarded;
 	        var callSiteBinder = Binder.InvokeMember(binderFlags, method.Name, null, method.DeclaringType, argumentInfo);
@@ -151,7 +151,7 @@ namespace Invocation
                 parameters.Add(Expression.Constant(method.DeclaringType));
             
             for (var i = 0; i < argumentCounter; i++)
-                parameters.Add(Expression.Parameter(typeof(object)));
+                parameters.Add(Expression.Parameter(Constants.ObjectType));
 
             var target = Expression.Field(callsite, "Target");
             var call = Expression.Invoke(target, parameters);
@@ -192,7 +192,7 @@ namespace Invocation
 
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Field(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, typeof (object));
+            var boxExpression = Expression.Convert(memberExpression, Constants.ObjectType);
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
@@ -215,7 +215,7 @@ namespace Invocation
 
             var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
             var memberExpression = Expression.Property(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, typeof (object));
+            var boxExpression = Expression.Convert(memberExpression, Constants.ObjectType);
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();

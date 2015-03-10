@@ -26,10 +26,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 
-namespace Invocation
+namespace Horizon
 {
     [DebuggerDisplay("{GetType().Name} - {Info.ToString()}")]
-    class MethodCaller
+    partial class MethodCaller
     {
         public static MethodCaller Create(MethodInfo info)
         {

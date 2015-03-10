@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Invocation
+namespace Horizon
 {
     class GenericMethodCaller : MethodCaller
     {
@@ -58,7 +58,7 @@ namespace Invocation
             var arguments = values.ToArray();
 
             var types = arguments.Cast<object>()
-                                 .Select(x => Reference.IsNull(x) ? typeof (object) : x.GetType());
+                                 .Select(x => Reference.IsNull(x) ? Constants.ObjectType : x.GetType());
 
             var hash = new TypeHash(types);
 

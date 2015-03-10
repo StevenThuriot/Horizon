@@ -24,9 +24,9 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 
-namespace Invocation
+namespace Horizon
 {
-    static class TypeInfo<T>
+    static partial class TypeInfo<T>
     {
         private static readonly ILookup<string, MethodCaller> Methods;
 

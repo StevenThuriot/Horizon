@@ -21,7 +21,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Invocation
+namespace Horizon
 {
     class SelectableArgument : Argument
     {

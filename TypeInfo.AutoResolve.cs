@@ -22,9 +22,9 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace Invocation
+namespace Horizon
 {
-    static class TypeInfo
+    static partial class TypeInfo
     {
         public static object GetProperty<T>(this T instance, string property)
         {

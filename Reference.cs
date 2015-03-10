@@ -1,7 +1,7 @@
 ﻿using System.Runtime;
 using System.Runtime.CompilerServices;
 
-namespace Invocation
+namespace Horizon
 {
     static class Reference
     {

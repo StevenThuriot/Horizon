@@ -21,7 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Invocation
+namespace Horizon
 {
     static class Constants
     {

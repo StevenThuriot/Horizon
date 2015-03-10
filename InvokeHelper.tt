@@ -20,6 +20,7 @@
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".g.cs" #>
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -28,7 +29,7 @@ using System.Runtime.ExceptionServices;
                          .SelectMany(x => x.GetTypes())
                          .Where(x => x.Name.StartsWith("Func`"))
                          .Max(x => x.GetGenericArguments().Length) - 2; #>
-namespace Invocation
+namespace Horizon
 {
     partial class InvokeHelper
     {
@@ -48,7 +49,7 @@ namespace Invocation
 					default:
 						try
 						{
-							return @delegate.DynamicInvoke(args);
+							return @delegate.DynamicInvoke(args.Cast<object>().ToArray());
 						}
 						catch (TargetInvocationException ex)
 						{
@@ -72,7 +73,7 @@ namespace Invocation
 					default: 
 						try
 						{
-							@delegate.DynamicInvoke(args);
+							@delegate.DynamicInvoke(args.Cast<object>().ToArray());
 						}
 						catch (TargetInvocationException ex)
 						{

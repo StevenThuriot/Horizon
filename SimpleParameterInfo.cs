@@ -21,9 +21,9 @@
 using System;
 using System.Reflection;
 
-namespace Invocation
+namespace Horizon
 {
-    class SimpleParameterInfo
+    partial class SimpleParameterInfo
     {
         public SimpleParameterInfo(string name, object defaultValue, Type parameterType, Type originalParameterType,
                                    bool hasDefaultValue)
