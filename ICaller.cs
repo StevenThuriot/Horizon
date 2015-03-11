@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace Horizon
 {
-    interface ICaller
+    partial interface ICaller
     {
         object Call(IEnumerable<dynamic> values);
     }
