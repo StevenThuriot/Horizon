@@ -1,4 +1,4 @@
-#region License
+﻿#region License
 
 //  
 // Copyright 2015 Steven Thuriot
@@ -20,60 +20,42 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-
 
 namespace Horizon
 {
-    [DebuggerDisplay("{GetType().Name} - {Info.ToString()}")]
-    class MethodCaller : IInternalCaller
-	{
-        public static MethodCaller Create(MethodInfo info)
-        {
-            if (info.IsGenericMethodDefinition)
-                return new GenericMethodCaller(info);
-
-            return new MethodCaller(info);
-        }
-
+    class ConstructorCaller : IInternalCaller
+    {
+        protected readonly ConstructorInfo Info;
 
         public readonly string Name;
-	    public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
-	    private readonly Lazy<Delegate> _caller;
-        private readonly Lazy<bool> _isAsync;
+        private readonly Lazy<Delegate> _caller;
 
-        protected readonly MethodInfo Info;
-
-        internal MethodCaller(MethodInfo info)
-            : this(info, info.GetParameters().Select(x =>new SimpleParameterInfo(x)))
+        internal ConstructorCaller(ConstructorInfo info)
+            : this(info, info.GetParameters().Select(x => new SimpleParameterInfo(x)))
         {
             _caller = info.BuildLazy();
         }
 
-        protected MethodCaller(MethodInfo info, IEnumerable<SimpleParameterInfo> parameterTypes)
+        protected ConstructorCaller(ConstructorInfo info, IEnumerable<SimpleParameterInfo> parameterTypes)
         {
             Info = info;
             Name = info.Name;
-			ParameterTypes = parameterTypes.ToArray();
-            _isAsync = new Lazy<bool>(() => typeof(Task).IsAssignableFrom(info.ReturnType));
+            ParameterTypes = parameterTypes.ToArray();
         }
 
-        public bool IsAsync
-        {
-            get { return _isAsync.Value; }
-        }
+        public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
 
         public bool IsStatic
         {
             get { return Info.IsStatic; }
         }
 
-        public Type ReturnType
+        public virtual object Call(IEnumerable<dynamic> values)
         {
-            get { return Info.ReturnType; }
+            var arguments = values.ToArray();
+            return _caller.Value.FastInvoke(arguments);
         }
 
 
@@ -82,10 +64,10 @@ namespace Horizon
             if (Reference.IsNull(obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((MethodCaller) obj);
+            return Equals((ConstructorCaller) obj);
         }
 
-        protected bool Equals(MethodCaller other)
+        protected bool Equals(ConstructorCaller other)
         {
             return string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
         }
@@ -96,13 +78,6 @@ namespace Horizon
             {
                 return (Name.GetHashCode()*397) ^ ParameterTypes.GetHashCode();
             }
-        }
-
-
-        public virtual object Call(IEnumerable<dynamic> values)
-        {
-            var arguments = values.ToArray();
-            return _caller.Value.FastInvoke(arguments);
         }
     }
 }

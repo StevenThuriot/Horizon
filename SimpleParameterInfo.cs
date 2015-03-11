@@ -23,7 +23,7 @@ using System.Reflection;
 
 namespace Horizon
 {
-    partial class SimpleParameterInfo
+	struct SimpleParameterInfo
     {
         public SimpleParameterInfo(string name, object defaultValue, Type parameterType, Type originalParameterType,
                                    bool hasDefaultValue)
@@ -47,10 +47,10 @@ namespace Horizon
         {
         }
 
-        public string Name { get; private set; }
-        public object DefaultValue { get; private set; }
-        public Type ParameterType { get; private set; }
-        public Type OriginalParameterType { get; private set; }
-        public bool HasDefaultValue { get; private set; }
+		public readonly string Name;
+		public readonly object DefaultValue;
+		public readonly Type ParameterType;
+		public readonly Type OriginalParameterType;
+		public readonly bool HasDefaultValue;
     }
 }

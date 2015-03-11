@@ -30,17 +30,16 @@ namespace Horizon
     {
         private static readonly ILookup<string, MethodCaller> Methods;
 
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetFields =
-            new Dictionary<string, Lazy<Func<T, object>>>();
+	    private static readonly List<ConstructorCaller> Constructors = new List<ConstructorCaller>();
 
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetProperties =
-            new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetFields = new Dictionary<string, Lazy<Func<T, object>>>();
 
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetFields =
-            new Dictionary<string, Lazy<Action<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetProperties = new Dictionary<string, Lazy<Func<T, object>>>();
 
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetProperties =
-            new Dictionary<string, Lazy<Action<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetFields = new Dictionary<string, Lazy<Action<T, object>>>();
+
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetProperties = new Dictionary<string, Lazy<Action<T, object>>>();
+
 
         static TypeInfo()
         {
@@ -73,8 +72,15 @@ namespace Horizon
                     var methodInfo = (MethodInfo) member;
                     var caller = MethodCaller.Create(methodInfo);
                     methods.Add(caller);
-                }
-            }
+				}
+				else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
+				{
+					var constructorInfo = (ConstructorInfo)member;
+
+					var caller = new ConstructorCaller(constructorInfo);
+					Constructors.Add(caller);
+				}
+			}
             
             Methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
                              .ToLookup(x => x.Name, x => x);
@@ -222,8 +228,26 @@ namespace Horizon
             return CallerSelector.TryCall(args, methods, out result);
         }
 
+	    public static T Create(params object[] args)
+	    {
+		    return (T) CallerSelector.Create(Constructors, args);
+	    }
 
-        public static bool HasField(string field)
+	    public static bool TryCreate(out T instance, params object[] args)
+	    {
+		    object boxedInstance;
+		    if (CallerSelector.TryCreate(Constructors, args, out boxedInstance))
+		    {
+			    instance = (T) boxedInstance;
+			    return true;
+		    }
+
+		    instance = default(T);
+		    return false;
+	    }
+
+
+	    public static bool HasField(string field)
         {
             return HasGetterField(field); //No need to check setter
         }
@@ -258,7 +282,7 @@ namespace Horizon
             return Methods.Contains(method);
         }
         
-        public static IEnumerable<MethodCaller> GetMethod(string method)
+        public static IEnumerable<ICaller> GetMethod(string method)
         {
             return Methods[method];
         }
@@ -288,8 +312,7 @@ namespace Horizon
 
         public static bool TryImplicitConvert(T instance, Type type, out dynamic result)
         {
-            var methods = Methods["op_Implicit"];
-            var method = methods.FirstOrDefault(n => n.ReturnType == type && n.ParameterTypes[0].ParameterType == Constants.Typed<T>.OwnerType);
+            var method = Findop_Implicit(type);
 
             if (method == null)
             {

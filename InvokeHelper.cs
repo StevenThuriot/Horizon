@@ -29,7 +29,7 @@ using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
 namespace Horizon
 {
-	public static partial class InvokeHelper
+	static partial class InvokeHelper
     {
         public static Lazy<Delegate> BuildLazy(this MethodInfo method)
         {
@@ -160,9 +160,56 @@ namespace Horizon
 
 	        return d;
         }
-    }
 
-    static class InvokeHelper<T>
+
+		public static Lazy<Delegate> BuildLazy(this ConstructorInfo ctor)
+		{
+			return new Lazy<Delegate>(() => Build(ctor));
+		}
+
+		public static Lazy<T> BuildLazy<T>(this ConstructorInfo ctor)
+		{
+			if (ctor == null) throw new ArgumentNullException("ctor");
+			return new Lazy<T>(() => Build<T>(ctor));
+		}
+
+		public static Delegate Build(this ConstructorInfo ctor)
+		{
+			IEnumerable<ParameterExpression> allParameters;
+			var ctorExpression = BuildExpression(ctor, out allParameters);
+
+			var lambda = Expression.Lambda(ctorExpression, "ctor_invoker", allParameters);
+			var func = lambda.Compile();
+
+			return func;
+		}
+
+		public static T Build<T>(this ConstructorInfo ctor)
+		{
+			IEnumerable<ParameterExpression> allParameters;
+			var ctorExpression = BuildExpression(ctor, out allParameters);
+
+			var lambda = Expression.Lambda<T>(ctorExpression, "ctor_invoker", allParameters);
+			var func = lambda.Compile();
+
+			return func;
+		}
+
+		private static Expression BuildExpression(ConstructorInfo ctor, out IEnumerable<ParameterExpression> allParameters)
+		{
+			var parameters = ctor.GetParameters()
+								 .Select(x => Expression.Parameter(x.ParameterType, x.Name))
+								 .ToList();
+
+			var caller = Expression.New(ctor, parameters);
+
+			allParameters = parameters;
+			return caller;
+		}
+
+	}
+
+	static class InvokeHelper<T>
     {
         public static Lazy<Func<T, object>> CreateGetterLazy(PropertyInfo info)
         {

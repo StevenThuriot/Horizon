@@ -21,6 +21,8 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Horizon
 {
@@ -119,6 +121,43 @@ namespace Horizon
         public static bool TryImplicitConvert<T>(this T instance, Type type, out dynamic result)
         {
             return TypeInfo<T>.TryImplicitConvert(instance, type, out result);
+		}
+
+		public static IEnumerable<ICaller> GetMethod<T>(string method)
+		{
+			return TypeInfo<T>.GetMethod(method);
+		}
+
+
+
+
+
+
+
+        private static readonly Dictionary<Type, Func<object[], dynamic>> _creatorCache = new Dictionary<Type, Func<object[], dynamic>>();
+		public static dynamic Create(Type type, params object[] args)
+		{
+		    Func<object[], dynamic> creator;
+		    if (_creatorCache.TryGetValue(type, out creator))
+		        return creator(args);
+
+		    var info = typeof (TypeInfo<>).MakeGenericType(type);
+		    var parameter = Expression.Parameter(Constants.ObjectArrayType, "arguments");
+		    var call = Expression.Call(info, "Create", null, parameter);
+		    var lambda = Expression.Lambda<Func<object[], dynamic>>(call, parameter);
+            _creatorCache[type] = creator = lambda.Compile();
+
+		    return creator(args);
+		}
+
+        public static T Create<T>(params object[] args)
+        {
+            return TypeInfo<T>.Create(args);
         }
-    }
+
+        public static bool TryCreate<T>(out T instance, params object[] args)
+        {
+            return TypeInfo<T>.TryCreate(out instance, args);
+        }
+	}
 }

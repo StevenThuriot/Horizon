@@ -25,300 +25,329 @@ using System.Linq;
 
 namespace Horizon
 {
-    static class CallerSelector
-    {
-        private static bool CompareParameters(IReadOnlyList<Argument> parameters,
-                                              MethodCaller key, out IEnumerable<SelectableArgument> arguments)
-        {
-            var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
-                                         .ToList();
+	static class CallerSelector
+	{
+		private static bool CompareParameters(IReadOnlyList<Argument> parameters, IInternalCaller key, out IEnumerable<SelectableArgument> arguments)
+		{
+			var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
+			                             .ToList();
 
-            arguments = selectableArguments;
-
-            for (var i = 0; i < parameters.Count; i++)
-            {
-                var parameter = parameters[i];
+			arguments = selectableArguments;
 
-                var methodParam = parameter.HasName
-                    ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
-                    : selectableArguments.ElementAtOrDefault(i);
-                //Unnamed params come first and in order, select by index.
+			for (var i = 0; i < parameters.Count; i++)
+			{
+				var parameter = parameters[i];
 
-                //Check if a param has been found.
-                if (methodParam == null) return false;
+				var methodParam = parameter.HasName
+					                  ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
+					                  : selectableArguments.ElementAtOrDefault(i);
+				//Unnamed params come first and in order, select by index.
 
-                if (parameter.Type == null)
-                {
-                    //If null, null has been passed so the type has to be a value type.
-                    if (!methodParam.Type.IsValueType) return false;
-                }
-                else
-                {
-                    //If not null, parameter has to be assignable to 
-	                if (!parameter.IsAssignableTo(methodParam.Type)) return false;
-                }
+				//Check if a param has been found.
+				if (methodParam == null) return false;
 
-                //Override value with passed value
-                methodParam.SelectFor(parameter);
-            }
+				if (parameter.Type == null)
+				{
+					//If null, null has been passed so the type has to be a value type.
+					if (!methodParam.Type.IsValueType) return false;
+				}
+				else
+				{
+					//If not null, parameter has to be assignable to 
+					if (!parameter.IsAssignableTo(methodParam.Type)) return false;
+				}
 
-            return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
-        }
+				//Override value with passed value
+				methodParam.SelectFor(parameter);
+			}
 
+			return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
+		}
 
-        private static readonly Stack<string> EmptyStack = new Stack<string>(); 
-        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            if (callers == null || !callers.Any())
-                return null;
-
-            var arguments = args.ToList();
-            return SelectMethod(callers, arguments, EmptyStack);
-        }
-
-        public static Tuple<MethodCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            if (callers == null || !callers.Any())
-                return null;
 
-            var arguments = args.ToList();
-
-            //Build argument list from binder
-            var names = new Stack<string>(binder.CallInfo.ArgumentNames);
-
-            return SelectMethod(callers, arguments, names);
-        }
+		private static readonly Stack<string> EmptyStack = new Stack<string>();
 
-         static Tuple<MethodCaller, List<dynamic>> SelectMethod(IEnumerable<MethodCaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
-        {
-            var list = new List<Argument>();
-            //Named parameters can always be mapped directly on the last parameters.
-            for (var i = arguments.Count - 1; i != -1; i--)
-            {
-                var argument = arguments[i];
-                string name = null;
+		public static Tuple<IInternalCaller, List<dynamic>> SelectMethod(IEnumerable<IInternalCaller> callers, IEnumerable<object> args)
+		{
+			if (callers == null || !callers.Any())
+				return null;
 
-                if (names.Count != 0)
-                    name = names.Pop();
+			var arguments = args.ToList();
+			return SelectMethod(callers, arguments, EmptyStack);
+		}
 
-                var arg = new Argument(name, argument);
-                list.Insert(0, arg);
-            }
+		public static Tuple<IInternalCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<IInternalCaller> callers, IEnumerable<object> args)
+		{
+			if (callers == null || !callers.Any())
+				return null;
 
-            IEnumerable<SelectableArgument> actualArguments = null;
+			var arguments = args.ToList();
 
-            //Compare argument list with relevant keys
-            var selectedCaller = (from caller in callers
-                                  where CompareParameters(list, caller, out actualArguments)
-                                  select caller).FirstOrDefault();
+			//Build argument list from binder
+			var names = new Stack<string>(binder.CallInfo.ArgumentNames);
 
-            if (selectedCaller == null)
-                return null;
+			return SelectMethod(callers, arguments, names);
+		}
 
-            return Tuple.Create(selectedCaller, actualArguments.Select(x => x.GetValue()).ToList());
-        }
+		private static Tuple<IInternalCaller, List<dynamic>> SelectMethod(IEnumerable<IInternalCaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
+		{
+			var list = new List<Argument>();
+			//Named parameters can always be mapped directly on the last parameters.
+			for (var i = arguments.Count - 1; i != -1; i--)
+			{
+				var argument = arguments[i];
+				string name = null;
 
-
-        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            var method = SelectMethod(binder, args, callers);
+				if (names.Count != 0)
+					name = names.Pop();
 
-            if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
+				var arg = new Argument(name, argument);
+				list.Insert(0, arg);
+			}
 
-            var caller = method.Item1;
-            var arguments = method.Item2;
+			IEnumerable<SelectableArgument> actualArguments = null;
 
-            return caller.Call(arguments);
-        }
+			//Compare argument list with relevant keys
+			var selectedCaller = (from caller in callers
+			                      where CompareParameters(list, caller, out actualArguments)
+			                      select caller).FirstOrDefault();
 
-        public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            var method = SelectMethod(binder, args, callers);
-
-            if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
+			if (selectedCaller == null)
+				return null;
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
-            
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			return Tuple.Create(selectedCaller, actualArguments.Select(x => x.GetValue()).ToList());
+		}
 
-            return caller.Call(arguments);
-        }
 
-        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
-        {
-            var method = SelectMethod(binder, args, callers);
+		public static object Call(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		{
+			var method = SelectMethod(binder, callers, args);
 
-            if (method == null)
-            {
-                result = null;
-                return false;
-            }
+			if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
 
-            var caller = method.Item1;
-            var arguments = method.Item2;
+			var caller = method.Item1;
+			var arguments = method.Item2;
 
-            result = caller.Call(arguments);
-            return true;
-        }
+			return caller.Call(arguments);
+		}
 
-        public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
-        {
-            var method = SelectMethod(binder, args, callers);
+		public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		{
+			var method = SelectMethod(binder, callers, args);
 
-            if (method == null)
-            {
-                result = null;
-                return false;
-            }
+			if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            result = caller.Call(arguments);
-            return true;
-        }
-        public static object Call(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            var method = SelectMethod(args, callers);
+			return caller.Call(arguments);
+		}
 
-            if (method == null) throw new ArgumentException("Invalid methodcall.");
+		public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		{
+			var method = SelectMethod(binder, callers, args);
 
-            var caller = method.Item1;
-            var arguments = method.Item2;
+			if (method == null)
+			{
+				result = null;
+				return false;
+			}
 
-            return caller.Call(arguments);
-        }
+			var caller = method.Item1;
+			var arguments = method.Item2;
 
-        public static object Call(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
-        {
-            var method = SelectMethod(args, callers);
+			result = caller.Call(arguments);
+			return true;
+		}
 
-            if (method == null) throw new ArgumentException("Invalid methodcall.");
+		public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		{
+			var method = SelectMethod(binder, callers, args);
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
-            
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (method == null)
+			{
+				result = null;
+				return false;
+			}
 
-            return caller.Call(arguments);
-        }
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-        public static bool TryCall(IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
-        {
-            var method = SelectMethod(args, callers);
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            if (method == null)
-            {
-                result = null;
-                return false;
-            }
+			result = caller.Call(arguments);
+			return true;
+		}
 
-            var caller = method.Item1;
-            var arguments = method.Item2;
+		public static object Call(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		{
+			var method = SelectMethod(callers, args);
 
-            result = caller.Call(arguments);
-            return true;
-        }
+			if (method == null) throw new ArgumentException("Invalid methodcall.");
 
-        public static bool TryCall(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
-        {
-            var method = SelectMethod(args, callers);
+			var caller = method.Item1;
+			var arguments = method.Item2;
 
-            if (method == null)
-            {
-                result = null;
-                return false;
-            }
+			return caller.Call(arguments);
+		}
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+		public static object Call(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		{
+			var method = SelectMethod(callers, args);
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (method == null) throw new ArgumentException("Invalid methodcall.");
 
-            result = caller.Call(arguments);
-            return true;
-        }
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-        public static object GetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes)
-        {
-            var method = SelectMethod(callers, indexes, new Stack<string>());
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            if (method == null) throw new ArgumentException("Invalid Indexer");
+			return caller.Call(arguments);
+		}
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+		public static bool TryCall(IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		{
+			var method = SelectMethod(callers, args);
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (method == null)
+			{
+				result = null;
+				return false;
+			}
 
-            return caller.Call(arguments);
-        }
+			var caller = method.Item1;
+			var arguments = method.Item2;
 
-        public static void SetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
-        {
-            var input = indexes.ToList();
-            input.Add(value);
+			result = caller.Call(arguments);
+			return true;
+		}
 
-            var method = SelectMethod(callers, input, new Stack<string>());
+		public static bool TryCall(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		{
+			var method = SelectMethod(callers, args);
 
-            if (method == null) throw new ArgumentException("Invalid Indexer");
+			if (method == null)
+			{
+				result = null;
+				return false;
+			}
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            caller.Call(arguments);
-        }
+			result = caller.Call(arguments);
+			return true;
+		}
 
-        public static bool TryGetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes,
-                                         out object result)
-        {
-            var method = SelectMethod(callers, indexes, new Stack<string>());
+		public static object GetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes)
+		{
+			var method = SelectMethod(callers, indexes);
 
-            if (method == null)
-            {
-                result = null;
-                return false;
-            }
+			if (method == null) throw new ArgumentException("Invalid Indexer");
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            result = caller.Call(arguments);
-            return true;
-        }
+			return caller.Call(arguments);
+		}
 
-        public static bool TrySetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes,
-                                         object value)
-        {
-            var input = indexes.ToList();
-            input.Add(value);
+		public static void SetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
+		{
+			var input = indexes.ToList();
+			input.Add(value);
 
-            var method = SelectMethod(callers, input, new Stack<string>());
+			var method = SelectMethod(callers, input);
 
-            if (method == null)
-                return false;
+			if (method == null) throw new ArgumentException("Invalid Indexer");
 
-            var caller = method.Item1;
-            var arguments = method.Item2.ToList();
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
 
-            if (!caller.IsStatic)
-                arguments.Insert(0, instance);
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
 
-            caller.Call(arguments);
-            return true;
-        }
-    }
+			caller.Call(arguments);
+		}
+
+		public static bool TryGetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, out object result)
+		{
+			var method = SelectMethod(callers, indexes);
+
+			if (method == null)
+			{
+				result = null;
+				return false;
+			}
+
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
+
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
+
+			result = caller.Call(arguments);
+			return true;
+		}
+
+		public static bool TrySetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
+		{
+			var input = indexes.ToList();
+			input.Add(value);
+
+			var method = SelectMethod(callers, input);
+
+			if (method == null)
+				return false;
+
+			var caller = method.Item1;
+			var arguments = method.Item2.ToList();
+
+			if (!caller.IsStatic)
+				arguments.Insert(0, instance);
+
+			caller.Call(arguments);
+			return true;
+		}
+
+
+		public static object Create(IEnumerable<ConstructorCaller> ctors, IEnumerable<object> arguments)
+		{
+			var ctor = SelectMethod(ctors, arguments);
+
+			if (ctor == null) throw new ArgumentException("Invalid Ctor");
+
+			var caller = ctor.Item1;
+			var args = ctor.Item2.ToList();
+
+			return caller.Call(args);
+		}
+
+		public static bool TryCreate(IEnumerable<ConstructorCaller> ctors, IEnumerable<object> arguments, out object instance)
+		{
+			var ctor = SelectMethod(ctors, arguments);
+
+			if (ctor == null)
+			{
+				instance = null;
+				return false;
+			}
+
+			var caller = ctor.Item1;
+			var args = ctor.Item2.ToList();
+
+			instance = caller.Call(args);
+			return true;
+		}
+	}
 }
