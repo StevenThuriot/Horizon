@@ -8,18 +8,18 @@ namespace Horizon
 {
     static partial class TypeInfo<T>
     {
-        private static readonly ILookup<string, MethodCaller> Methods;
+        private static readonly ILookup<string, MethodCaller> _methods;
 
-	    private static readonly List<ConstructorCaller> Constructors = new List<ConstructorCaller>();
+	    private static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
 
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetFields = new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> _getFields = new Dictionary<string, Lazy<Func<T, object>>>();
 
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> GetProperties = new Dictionary<string, Lazy<Func<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Func<T, object>>> _getProperties = new Dictionary<string, Lazy<Func<T, object>>>();
 
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetFields = new Dictionary<string, Lazy<Action<T, object>>>();
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> _setFields = new Dictionary<string, Lazy<Action<T, object>>>();
 
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> SetProperties = new Dictionary<string, Lazy<Action<T, object>>>();
-
+        private static readonly Dictionary<string, Lazy<Action<T, object>>> _setProperties = new Dictionary<string, Lazy<Action<T, object>>>();
+        
 
         static TypeInfo()
         {
@@ -33,19 +33,19 @@ namespace Horizon
                 {
                     var propertyInfo = (PropertyInfo) member;
                     if (propertyInfo.CanWrite)
-                        SetProperties[key] = InvokeHelper<T>.CreateSetterLazy(propertyInfo);
+                        _setProperties[key] = InvokeHelper<T>.CreateSetterLazy(propertyInfo);
 
                     if (propertyInfo.CanRead)
-                        GetProperties[key] = InvokeHelper<T>.CreateGetterLazy(propertyInfo);
+                        _getProperties[key] = InvokeHelper<T>.CreateGetterLazy(propertyInfo);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
                     var fieldInfo = (FieldInfo) member;
 
                     if (!fieldInfo.IsInitOnly)
-                        SetFields[key] = InvokeHelper<T>.CreateSetterLazy(fieldInfo);
+                        _setFields[key] = InvokeHelper<T>.CreateSetterLazy(fieldInfo);
 
-                    GetFields[key] = InvokeHelper<T>.CreateGetterLazy(fieldInfo);
+                    _getFields[key] = InvokeHelper<T>.CreateGetterLazy(fieldInfo);
                 }
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
@@ -58,38 +58,38 @@ namespace Horizon
 					var constructorInfo = (ConstructorInfo)member;
 
 					var caller = new ConstructorCaller(constructorInfo);
-					Constructors.Add(caller);
+					_constructors.Add(caller);
 				}
 			}
             
-            Methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
+            _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
                              .ToLookup(x => x.Name, x => x);
         }
 
         public static object GetProperty(T instance, string property)
         {
-            return GetProperties[property].Value(instance);
+            return _getProperties[property].Value(instance);
         }
 
         public static object GetField(T instance, string field)
         {
-            return GetFields[field].Value(instance);
+            return _getFields[field].Value(instance);
         }
 
         public static void SetProperty(T instance, string property, object value)
         {
-            SetProperties[property].Value(instance, value);
+            _setProperties[property].Value(instance, value);
         }
 
         public static void SetField(T instance, string field, object value)
         {
-            SetFields[field].Value(instance, value);
+            _setFields[field].Value(instance, value);
         }
 
         public static bool TryGetProperty(T instance, string property, out object result)
         {
             Lazy<Func<T, object>> getter;
-            if (GetProperties.TryGetValue(property, out getter))
+            if (_getProperties.TryGetValue(property, out getter))
             {
                 result = getter.Value(instance);
                 return true;
@@ -102,7 +102,7 @@ namespace Horizon
         public static bool TryGetField(T instance, string field, out object result)
         {
             Lazy<Func<T, object>> getter;
-            if (GetFields.TryGetValue(field, out getter))
+            if (_getFields.TryGetValue(field, out getter))
             {
                 result = getter.Value(instance);
                 return true;
@@ -114,20 +114,20 @@ namespace Horizon
 
         public static object GetIndexer(T instance, object[] indexes)
         {
-            var methods = Methods["get_Item"];
+            var methods = _methods["get_Item"];
             return CallerSelector.GetIndexer(instance, methods, indexes);
         }
 
         public static bool TryGetIndexer(T instance, object[] indexes, out object result)
         {
-            var methods = Methods["get_Item"];
+            var methods = _methods["get_Item"];
             return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
         }
 
         public static bool TrySetProperty(T instance, string property, object value)
         {
             Lazy<Action<T, object>> setter;
-            if (SetProperties.TryGetValue(property, out setter))
+            if (_setProperties.TryGetValue(property, out setter))
             {
                 setter.Value(instance, value);
                 return true;
@@ -139,7 +139,7 @@ namespace Horizon
         public static bool TrySetField(T instance, string field, object value)
         {
             Lazy<Action<T, object>> setter;
-            if (SetFields.TryGetValue(field, out setter))
+            if (_setFields.TryGetValue(field, out setter))
             {
                 setter.Value(instance, value);
                 return true;
@@ -150,73 +150,73 @@ namespace Horizon
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = Methods["set_Item"];
+            var methods = _methods["set_Item"];
             CallerSelector.SetIndexer(instance, methods, indexes, value);
         }
 
         public static bool TrySetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = Methods["set_Item"];
+            var methods = _methods["set_Item"];
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
         public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args)
         {
-            var methods = Methods[binder.Name];
+            var methods = _methods[binder.Name];
             return CallerSelector.Call(instance, binder, args, methods);
         }
 
         public static object Call(InvokeMemberBinder binder, IEnumerable<object> args)
         {
-            var methods = Methods[binder.Name];
+            var methods = _methods[binder.Name];
             return CallerSelector.Call(binder, args, methods);
         }
 
         public static bool TryCall(T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result)
         {
-            var methods = Methods[binder.Name];
+            var methods = _methods[binder.Name];
             return CallerSelector.TryCall(instance, binder, args, methods, out result);
         }
 
         public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, out object result)
         {
-            var methods = Methods[binder.Name];
+            var methods = _methods[binder.Name];
             return CallerSelector.TryCall(binder, args, methods, out result);
         }
 
         public static object Call(T instance, string methodName, IEnumerable<object> args)
         {
-            var methods = Methods[methodName];
+            var methods = _methods[methodName];
             return CallerSelector.Call(instance, args, methods);
         }
 
         public static object Call(string methodName, IEnumerable<object> args)
         {
-            var methods = Methods[methodName];
+            var methods = _methods[methodName];
             return CallerSelector.Call(args, methods);
         }
 
         public static bool TryCall(T instance, string methodName, IEnumerable<object> args, out object result)
         {
-            var methods = Methods[methodName];
+            var methods = _methods[methodName];
             return CallerSelector.TryCall(instance, args, methods, out result);
         }
 
         public static bool TryCall(string methodName, IEnumerable<object> args, out object result)
         {
-            var methods = Methods[methodName];
+            var methods = _methods[methodName];
             return CallerSelector.TryCall(args, methods, out result);
         }
 
 	    public static T Create(params object[] args)
 	    {
-		    return (T) CallerSelector.Create(Constructors, args);
+		    return (T) CallerSelector.Create(_constructors, args);
 	    }
 
 	    public static bool TryCreate(out T instance, params object[] args)
 	    {
 		    object boxedInstance;
-		    if (CallerSelector.TryCreate(Constructors, args, out boxedInstance))
+		    if (CallerSelector.TryCreate(_constructors, args, out boxedInstance))
 		    {
 			    instance = (T) boxedInstance;
 			    return true;
@@ -239,32 +239,32 @@ namespace Horizon
 
         public static bool HasGetterProperty(string property)
         {
-            return GetProperties.ContainsKey(property);
+            return _getProperties.ContainsKey(property);
         }
 
         public static bool HasSetterProperty(string property)
         {
-            return SetProperties.ContainsKey(property);
+            return _setProperties.ContainsKey(property);
         }
 
         public static bool HasGetterField(string field)
         {
-            return GetFields.ContainsKey(field);
+            return _getFields.ContainsKey(field);
         }
 
         public static bool HasSetterField(string field)
         {
-            return SetFields.ContainsKey(field);
+            return _setFields.ContainsKey(field);
         }
 
         public static bool HasMethod(string method)
         {
-            return Methods.Contains(method);
+            return _methods.Contains(method);
         }
         
         public static IEnumerable<ICaller> GetMethod(string method)
         {
-            return Methods[method];
+            return _methods[method];
         }
 
 
@@ -308,7 +308,7 @@ namespace Horizon
 
         private static MethodCaller Findop_Implicit(Type type)
         {
-            var methods = Methods["op_Implicit"];
+            var methods = _methods["op_Implicit"];
             var owner = Constants.Typed<T>.OwnerType;
             var method = methods.FirstOrDefault(x => x.ReturnType == type && x.ParameterTypes[0].ParameterType == owner);
 
