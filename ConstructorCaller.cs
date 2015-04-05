@@ -9,7 +9,7 @@ namespace Horizon
     {
         protected readonly ConstructorInfo Info;
 
-        public readonly string Name;
+        public string Name { get; private set; }
         private readonly Lazy<Delegate> _caller;
 
         internal ConstructorCaller(ConstructorInfo info)

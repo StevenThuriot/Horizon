@@ -20,7 +20,8 @@ namespace Horizon
         }
 
 
-        public readonly string Name;
+        public string Name { get; private set; }
+
 	    public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
 	    private readonly Lazy<Delegate> _caller;
         private readonly Lazy<bool> _isAsync;

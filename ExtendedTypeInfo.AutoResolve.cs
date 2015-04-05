@@ -9,12 +9,12 @@ namespace Horizon
     {
         public static class Extended
         {
-            public static IEnumerable<MethodCaller> Methods<T>(T instance)
+            public static IEnumerable<ICaller> Methods<T>(T instance)
             {
                 return TypeInfo<T>.Extended.Methods;
             }
 
-            public static IEnumerable<ConstructorCaller> Constructors<T>(T instance)
+            public static IEnumerable<ICaller> Constructors<T>(T instance)
             {
                 return TypeInfo<T>.Extended.Constructors;
             }
@@ -35,17 +35,12 @@ namespace Horizon
 
 
 
-            private static readonly Dictionary<Type, Func<IEnumerable<MethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<MethodCaller>>>();
-            private static readonly Dictionary<Type, Func<IEnumerable<ConstructorCaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ConstructorCaller>>>();
-            private static readonly Dictionary<Type, dynamic> _getterCache = new Dictionary<Type, dynamic>();
-            private static readonly Dictionary<Type, dynamic> _setterCache = new Dictionary<Type, dynamic>();
-
-            public static dynamic Methods(Type type)
+            public static IEnumerable<ICaller> Methods(Type type)
             {
                 return ResolveCallForType(type, _methodCache);
             }
 
-            public static IEnumerable<ConstructorCaller> Constructors(Type type)
+            public static IEnumerable<ICaller> Constructors(Type type)
             {
                 return ResolveCallForType(type, _ctorCache);
             }
@@ -58,6 +53,18 @@ namespace Horizon
             {
                 return DynamicResolveCallForType(type, _setterCache);
             }
+
+
+
+
+
+
+
+
+            private static readonly Dictionary<Type, Func<IEnumerable<MethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<MethodCaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<ConstructorCaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ConstructorCaller>>>();
+            private static readonly Dictionary<Type, dynamic> _getterCache = new Dictionary<Type, dynamic>();
+            private static readonly Dictionary<Type, dynamic> _setterCache = new Dictionary<Type, dynamic>();
 
             private static TResult ResolveCallForType<TResult>(Type type, Dictionary<Type, Func<TResult>> cache, [CallerMemberName]string propertyName = null)
             {

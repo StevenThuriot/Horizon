@@ -8,12 +8,12 @@ namespace Horizon
     {
         public static class Extended
         {
-            public static IEnumerable<MethodCaller> Methods
+            public static IEnumerable<ICaller> Methods
             {
                 get { return _methods.SelectMany(callers => callers); }
             }
 
-            public static IEnumerable<ConstructorCaller> Constructors
+            public static IEnumerable<ICaller> Constructors
             {
                 get { return _constructors.AsReadOnly(); }
             }
