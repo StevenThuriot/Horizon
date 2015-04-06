@@ -19,6 +19,12 @@ namespace Horizon
                 return TypeInfo<T>.Extended.Constructors;
             }
 
+            public static IEnumerable<IEventCaller> Events<T>(T instance)
+            {
+                return TypeInfo<T>.Extended.Events;
+            }
+
+
             public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> Getters<T>(T instance)
             {
                 return TypeInfo<T>.Extended.Getters;
@@ -44,6 +50,12 @@ namespace Horizon
             {
                 return ResolveCallForType(type, _ctorCache);
             }
+
+            public static IEnumerable<IEventCaller> Events(Type type)
+            {
+                return ResolveCallForType(type, _eventCache);
+            }
+            
             public static dynamic Getters(Type type)
             {
                 return DynamicResolveCallForType(type, _getterCache);
@@ -63,6 +75,7 @@ namespace Horizon
 
             private static readonly Dictionary<Type, Func<IEnumerable<MethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<MethodCaller>>>();
             private static readonly Dictionary<Type, Func<IEnumerable<ConstructorCaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ConstructorCaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<EventCaller>>> _eventCache = new Dictionary<Type, Func<IEnumerable<EventCaller>>>();
             private static readonly Dictionary<Type, dynamic> _getterCache = new Dictionary<Type, dynamic>();
             private static readonly Dictionary<Type, dynamic> _setterCache = new Dictionary<Type, dynamic>();
 

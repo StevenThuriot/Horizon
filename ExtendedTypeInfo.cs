@@ -18,6 +18,11 @@ namespace Horizon
                 get { return _constructors.AsReadOnly(); }
             }
 
+            public static IEnumerable<IEventCaller> Events
+            {
+                get { return _events.AsReadOnly(); }
+            }
+
             public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> Getters
             {
                 get

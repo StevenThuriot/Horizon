@@ -19,6 +19,8 @@ namespace Horizon
         private static readonly Dictionary<string, Lazy<Action<T, object>>> _setFields = new Dictionary<string, Lazy<Action<T, object>>>();
 
         private static readonly Dictionary<string, Lazy<Action<T, object>>> _setProperties = new Dictionary<string, Lazy<Action<T, object>>>();
+
+        private static readonly List<EventCaller> _events = new List<EventCaller>();
         
 
         static TypeInfo()
@@ -56,10 +58,16 @@ namespace Horizon
 				else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
 				{
 					var constructorInfo = (ConstructorInfo)member;
-
-					var caller = new ConstructorCaller(constructorInfo);
+                    var caller = new ConstructorCaller(constructorInfo);
 					_constructors.Add(caller);
 				}
+                else if ((MemberTypes.Event & member.MemberType) == MemberTypes.Event)
+                {
+                    var eventInfo = (EventInfo) member;
+                    var caller = new EventCaller(eventInfo);
+
+                    _events.Add(caller);
+                }
 			}
             
             _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
@@ -265,6 +273,16 @@ namespace Horizon
         public static IEnumerable<ICaller> GetMethod(string method)
         {
             return _methods[method];
+        }
+
+        public static bool HasEvent(string @event)
+        {
+            return _events.Any(x => x.Name == @event);
+        }
+        
+        public static IEventCaller GetEvent(string @event)
+        {
+            return _events.FirstOrDefault(x => x.Name == @event);
         }
 
 
