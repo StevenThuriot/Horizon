@@ -1,6 +1,5 @@
 
 
-Horizon
+{{ site.title }}
 &mdash;
-https://github.com/StevenThuriot/Horizon
-
+{{ site.source_link }}
