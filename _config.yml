@@ -15,7 +15,7 @@ highlighter: pygments
 
 
 ### content configuration ###
-title:       "Horizon - .NET Fast Very Late Binding invoker "
+title:       "Horizon &mdash; Reflection done right"
 keywords:    "C#, Horizon, Late Binding, Invoke, Reflection"
 description: ".NET Fast Very Late Binding invoker"
 source_link: "https://github.com/StevenThuriot/Horizon"
