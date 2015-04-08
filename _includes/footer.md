@@ -2,4 +2,4 @@
 
 {{ site.title }}
 &mdash;
-{{ site.source_link }}
+This project is [Open Source]({{ site.source_link }})
