@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Horizon
@@ -22,24 +24,48 @@ namespace Horizon
             _remove = new MethodCaller(info.RemoveMethod);
         }
 
-        public void Add(IEnumerable<dynamic> values)
+        public object Call(IEnumerable<dynamic> values)
         {
+            return _raise.Call(values);
+        }
+
+        public void Raise<T>(T instance, params dynamic[] arguments)
+        {
+            var length = arguments.Length;
+            var values = new dynamic[length + 1];
+            values[0] = instance;
+
+            if (length != 0) Array.Copy(arguments, 0, values, 1, length);
+
+            _raise.Call(values);
+        }
+
+        public void Add<T>(T instance, params Delegate[] handlers)
+        {
+            var length = handlers.Length;
+            var values = new dynamic[length + 1];
+            values[0] = instance;
+
+            if (length != 0) Array.Copy(handlers, 0, values, 1, length);
+            
+
             _add.Call(values);
         }
 
-        public void Remove(IEnumerable<dynamic> values)
+        public void Remove<T>(T instance, params Delegate[] handlers)
         {
+            var length = handlers.Length;
+            var values = new dynamic[length + 1];
+            values[0] = instance;
+
+            if (length != 0) Array.Copy(handlers, 0, values, 1, length);
+
             _remove.Call(values);
         }
 
         public string Name
         {
             get { return _info.Name; }
-        }
-
-        public object Call(IEnumerable<dynamic> values)
-        {
-            return _raise.Call(values);
         }
 
         public IReadOnlyList<SimpleParameterInfo> ParameterTypes
