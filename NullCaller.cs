@@ -6,9 +6,11 @@ namespace Horizon
     class NullCaller : IInternalCaller
     {
         public static IInternalCaller Instance = new NullCaller();
+        private SimpleParameterInfo[] _parameterTypes;
 
         private NullCaller()
         {
+            _parameterTypes = new SimpleParameterInfo[0];
         }
 
 
@@ -20,7 +22,7 @@ namespace Horizon
 
         public IReadOnlyList<SimpleParameterInfo> ParameterTypes
         {
-            get { return Enumerable.Empty<SimpleParameterInfo>().ToArray(); }
+            get { return _parameterTypes; }
         }
 
         public bool IsStatic { get { return false; }}
