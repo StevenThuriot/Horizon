@@ -1,5 +1,5 @@
 ---
-title: "contributing"
+title: "contribute"
 bg: purple
 color: white
 fa-icon: cloud-upload
