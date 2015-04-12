@@ -40,7 +40,8 @@ Before you submit your pull request consider the following:
      ```shell
      git commit -a
      ```
-  Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
+
+Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
 * Push your branch to GitHub:
 
