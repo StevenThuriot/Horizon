@@ -7,11 +7,14 @@ fa-icon: cloud-upload
 
 ## Contributing to Horizon
 
-Want to hack on Horizon? Awesome! 
+Want to hack on Horizon? Awesome! We'd love for you to contribute to our source code and to make Horizon even better than it is today!
+
+-------------------------
+
 
 ### Got a Question or Problem?
 
-If you have questions about how to use Horizon, feel free to contact through GitHub.
+If you have questions about how to use Horizon, feel free to contact through [GitHub][issues].
 
 ### Found an Issue?
 
@@ -19,11 +22,17 @@ If you find a bug in the source code or a mistake in the documentation, you can 
 
 Even better, you can submit a Pull Request with a fix.
 
+-------------------------
+
+
 ### Want a Feature?
 
 You can request a new feature by submitting an issue to our [GitHub Repository][github]. 
 
 Pull Request will also be accepted!
+
+-------------------------
+
 
 ### Submitting a Pull Request
 Before you submit your pull request consider the following:
@@ -93,4 +102,5 @@ from the main (upstream) repository:
 	
 	
 [github]: https://github.com/StevenThuriot/Horizon
+[issues]: https://github.com/StevenThuriot/Horizon/issues
 [pulls]: https://github.com/StevenThuriot/Horizon/pulls
