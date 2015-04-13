@@ -37,36 +37,37 @@ Pull Request will also be accepted!
 ### Submitting a Pull Request
 Before you submit your pull request consider the following:
 
-* Search [GitHub][pulls] for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.
-* Make your changes in a new git branch:
+Search [GitHub][pulls] for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.
 
-     ```shell
-     git checkout -b my-fix-branch master
-     ```
+Make your changes in a new git branch:
 
-* Commit your changes using a descriptive commit message.
+```shell
+git checkout -b my-fix-branch master
+```
 
-     ```shell
-     git commit -a
-     ```
+Commit your changes using a descriptive commit message.
+
+```shell
+git commit -a
+```
 
 Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
-* Push your branch to GitHub:
+Push your branch to GitHub:
 
-    ```shell
-    git push origin my-fix-branch
-    ```
+```shell
+git push origin my-fix-branch
+```
 
-* In GitHub, send a pull request to `Horizon:master`.
-* If we suggest changes then:
-  * Make the required updates.
-  * Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
+In GitHub, send a pull request to `Horizon:master`.
+If we suggest changes then:
+* Make the required updates.
+* Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
-    ```shell
-    git rebase master -i
-    git push origin my-fix-branch -f
-    ```
+```shell
+git rebase master -i
+git push origin my-fix-branch -f
+```
 
 That's it! Thank you for your contribution!
 
@@ -75,32 +76,30 @@ That's it! Thank you for your contribution!
 After your pull request is merged, you can safely delete your branch and pull the changes
 from the main (upstream) repository:
 
-* Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
+Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
 
-    ```shell
-    git push origin --delete my-fix-branch
-    ```
+```shell
+git push origin --delete my-fix-branch
+```
 
-* Check out the master branch:
+Check out the master branch:
 
-    ```shell
-    git checkout master -f
-    ```
+```shell
+git checkout master -f
+```
 
-* Delete the local branch:
+Delete the local branch:
 
-    ```shell
-    git branch -D my-fix-branch
-    ```
+```shell
+git branch -D my-fix-branch
+```
 
-* Update your master with the latest upstream version:
+Update your master with the latest upstream version:
 
-    ```shell
-    git pull --ff upstream master
-    ```
-	
-	
-	
+```shell
+git pull --ff upstream master
+```
+
 [github]: {{ site.source_link }}
 [issues]: {{ site.source_link }}/issues
 [pulls]: {{ site.source_link }}/pulls
