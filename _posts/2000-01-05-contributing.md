@@ -101,6 +101,6 @@ from the main (upstream) repository:
 	
 	
 	
-[github]: https://github.com/StevenThuriot/Horizon
-[issues]: https://github.com/StevenThuriot/Horizon/issues
-[pulls]: https://github.com/StevenThuriot/Horizon/pulls
+[github]: {{ site.source_link }}
+[issues]: {{ site.source_link }}/issues
+[pulls]: {{ site.source_link }}/pulls
