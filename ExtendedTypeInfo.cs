@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Horizon
@@ -20,7 +21,7 @@ namespace Horizon
 
             public static IEnumerable<IEventCaller> Events
             {
-                get { return _events.AsReadOnly(); }
+                get { return _events.Values; }
             }
 
             public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> Getters
@@ -53,6 +54,26 @@ namespace Horizon
                         yield return field;
                     }
                 }
+            }
+
+            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> FieldGetters
+            {
+                get { return new ReadOnlyDictionary<string, Lazy<Func<T, object>>>(_getFields); }
+            }
+
+            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> PropertyGetters
+            {
+                get { return new ReadOnlyDictionary<string, Lazy<Func<T, object>>>(_getProperties); }
+            }
+
+            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> FieldSetters
+            {
+                get { return new ReadOnlyDictionary<string, Lazy<Action<T, object>>>(_setFields); }
+            }
+
+            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> PropertySetters
+            {
+                get { return new ReadOnlyDictionary<string, Lazy<Action<T, object>>>(_setProperties); }
             }
         }
     }
