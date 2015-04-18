@@ -29,7 +29,7 @@ namespace Horizon
             return _raise.Call(values);
         }
 
-        public void Raise<T>(T instance, params dynamic[] arguments)
+        public void Raise(dynamic instance, params dynamic[] arguments)
         {
             var length = arguments.Length;
             var values = new dynamic[length + 1];
@@ -40,7 +40,7 @@ namespace Horizon
             _raise.Call(values);
         }
 
-        public void Add<T>(T instance, params Delegate[] handlers)
+        public void Add(dynamic instance, params Delegate[] handlers)
         {
             var length = handlers.Length;
             var values = new dynamic[length + 1];
@@ -52,7 +52,7 @@ namespace Horizon
             _add.Call(values);
         }
 
-        public void Remove<T>(T instance, params Delegate[] handlers)
+        public void Remove(dynamic instance, params Delegate[] handlers)
         {
             var length = handlers.Length;
             var values = new dynamic[length + 1];
