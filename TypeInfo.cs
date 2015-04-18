@@ -20,12 +20,13 @@ namespace Horizon
 
         private static readonly Dictionary<string, Lazy<Action<T, object>>> _setProperties = new Dictionary<string, Lazy<Action<T, object>>>();
 
-        private static readonly List<EventCaller> _events = new List<EventCaller>();
+        private static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
         
 
         static TypeInfo()
         {
             var methods = new List<MethodCaller>();
+            var events = new List<EventCaller>();
 
             foreach (var member in Constants.Typed<T>.OwnerType.GetMembers())
             {
@@ -66,12 +67,14 @@ namespace Horizon
                     var eventInfo = (EventInfo) member;
                     var caller = new EventCaller(eventInfo);
 
-                    _events.Add(caller);
+                    events.Add(caller);
                 }
 			}
             
             _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
                              .ToLookup(x => x.Name, x => x);
+
+            _events = events.ToDictionary(x => x.Name);
         }
 
         public static object GetProperty(T instance, string property)
@@ -93,6 +96,29 @@ namespace Horizon
         {
             _setFields[field].Value(instance, value);
         }
+
+        public static void RaiseEvent(T instance, string @event, params dynamic[] arguments)
+        {
+            _events[@event].Raise(instance, arguments);
+        }
+        
+        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates)
+        {
+            _events[@event].Add(instance, delegates);
+        }
+
+        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates)
+        {
+            _events[@event].Remove(instance, delegates);
+        }
+
+
+
+
+
+
+
+
 
         public static bool TryGetProperty(T instance, string property, out object result)
         {
@@ -234,6 +260,38 @@ namespace Horizon
 		    return false;
 	    }
 
+        public static bool TryRaiseEvent(T instance, string @event, params dynamic[] arguments)
+        {
+            EventCaller caller;
+            if (!_events.TryGetValue(@event, out caller)) return false;
+
+            caller.Raise(instance, arguments);
+            return true;
+        }
+
+        public static bool TryAddEventHandler(T instance, string @event, params Delegate[] delegates)
+        {
+            EventCaller caller;
+            if (!_events.TryGetValue(@event, out caller)) return false;
+
+            caller.Add(instance, delegates);
+            return true;
+        }
+
+        public static bool TryRemoveEventHandler(T instance, string @event, params Delegate[] delegates)
+        {
+            EventCaller caller;
+            if (!_events.TryGetValue(@event, out caller)) return false;
+
+            caller.Remove(instance, delegates);
+            return true;
+        }
+
+
+
+
+
+
 
 	    public static bool HasField(string field)
         {
@@ -277,12 +335,12 @@ namespace Horizon
 
         public static bool HasEvent(string @event)
         {
-            return _events.Any(x => x.Name == @event);
+            return _events.ContainsKey(@event);
         }
         
         public static IEventCaller GetEvent(string @event)
         {
-            return _events.FirstOrDefault(x => x.Name == @event);
+            return _events[@event];
         }
 
 

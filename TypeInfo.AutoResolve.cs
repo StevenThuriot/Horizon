@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace Horizon
 {
@@ -26,6 +25,21 @@ namespace Horizon
         public static void SetField<T>(this T instance, string field, object value)
         {
             TypeInfo<T>.SetField(instance, field, value);
+        }
+
+        public static void RaiseEvent<T>(this T instance, string @event, params dynamic[] arguments)
+        {
+            TypeInfo<T>.RaiseEvent(instance, @event, arguments);
+        }
+
+        public static void AddEventHandler<T>(this T instance, string @event, params Delegate[] delegates)
+        {
+            TypeInfo<T>.AddEventHandler(instance, @event, delegates);
+        }
+
+        public static void RemoveEventHandler<T>(this T instance, string @event, params Delegate[] delegates)
+        {
+            TypeInfo<T>.RemoveEventHandler(instance, @event, delegates);
         }
 
         public static bool TryGetProperty<T>(this T instance, string property, out object result)
@@ -116,6 +130,21 @@ namespace Horizon
         public static IEventCaller GetEvent<T>(this T instance, string @event)
         {
             return TypeInfo<T>.GetEvent(@event);
+        }
+
+        public static bool TryRaiseEvent<T>(this T instance, string @event, params dynamic[] arguments)
+        {
+            return TypeInfo<T>.TryRaiseEvent(instance, @event, arguments);
+        }
+
+        public static bool TryAddEventHandler<T>(this T instance, string @event, params Delegate[] delegates)
+        {
+            return TypeInfo<T>.TryAddEventHandler(instance, @event, delegates);
+        }
+
+        public static bool TryRemoveEventHandler<T>(this T instance, string @event, params Delegate[] delegates)
+        {
+            return TypeInfo<T>.TryRemoveEventHandler(instance, @event, delegates);
         }
 
 
