@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Horizon
@@ -13,12 +12,15 @@ namespace Horizon
         private readonly ICaller _add;
         private readonly ICaller _remove;
 
+        public bool CanRaise { get; private set; }
+
         public EventCaller(EventInfo info)
         {
             _info = info;
 
             var raise = info.RaiseMethod;
-            _raise = raise == null ? NullCaller.Instance : new MethodCaller(raise);
+            CanRaise = raise != null;
+            _raise = CanRaise ? new MethodCaller(raise) : NullCaller.Instance;
 
             _add = new MethodCaller(info.AddMethod);
             _remove = new MethodCaller(info.RemoveMethod);
