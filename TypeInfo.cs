@@ -8,6 +8,9 @@ namespace Horizon
 {
     static partial class TypeInfo<T>
     {
+        private const string Indexer_Getter = "get_Item";
+        private const string Indexer_Setter = "set_Item";
+
         private static readonly ILookup<string, MethodCaller> _methods;
 
 	    private static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
@@ -28,7 +31,8 @@ namespace Horizon
             var methods = new List<MethodCaller>();
             var events = new List<EventCaller>();
 
-            foreach (var member in Constants.Typed<T>.OwnerType.GetMembers())
+            foreach (var member in Constants.Typed<T>.OwnerType.GetMembers(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static //default getMember flags
+                                                                                | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)) //Our additional flags
             {
                 var key = member.Name;
 
@@ -53,9 +57,14 @@ namespace Horizon
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
                     var methodInfo = (MethodInfo) member;
-                    var caller = MethodCaller.Create(methodInfo);
-                    methods.Add(caller);
-				}
+                    if (!methodInfo.IsSpecialName || methodInfo.Name == Indexer_Getter || methodInfo.Name == Indexer_Setter)
+                    {
+                        //Skip Properties, events, ... 
+                        //Keep indexer. It's considered a specialname (property), but can have overloads thus we want to use the CallerSelector.
+                        var caller = MethodCaller.Create(methodInfo);
+                        methods.Add(caller);
+                    }
+                }
 				else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
 				{
 					var constructorInfo = (ConstructorInfo)member;
@@ -148,13 +157,13 @@ namespace Horizon
 
         public static object GetIndexer(T instance, object[] indexes)
         {
-            var methods = _methods["get_Item"];
+            var methods = _methods[Indexer_Getter];
             return CallerSelector.GetIndexer(instance, methods, indexes);
         }
 
         public static bool TryGetIndexer(T instance, object[] indexes, out object result)
         {
-            var methods = _methods["get_Item"];
+            var methods = _methods[Indexer_Getter];
             return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
         }
 
@@ -184,13 +193,13 @@ namespace Horizon
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _methods["set_Item"];
+            var methods = _methods[Indexer_Setter];
             CallerSelector.SetIndexer(instance, methods, indexes, value);
         }
 
         public static bool TrySetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _methods["set_Item"];
+            var methods = _methods[Indexer_Setter];
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
