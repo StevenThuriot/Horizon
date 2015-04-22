@@ -123,7 +123,34 @@ namespace Horizon
 
 
 
+        public static object GetValue(T instance, string propertyOrField)
+        {
+            Lazy<Func<T, object>> getter;
+            if (_getProperties.TryGetValue(propertyOrField, out getter))
+                return getter.Value(instance);
 
+            return _getFields[propertyOrField].Value(instance);
+        }
+
+
+        public static bool TryGetValue(T instance, string propertyOrField, out object result)
+        {
+            Lazy<Func<T, object>> getter;
+            if (_getProperties.TryGetValue(propertyOrField, out getter))
+            {
+                result = getter.Value(instance);
+                return true;
+            }
+
+            if (_getFields.TryGetValue(propertyOrField, out getter))
+            {
+                result = getter.Value(instance);
+                return true;
+            }
+
+            result = null;
+            return false;
+        }
 
 
 

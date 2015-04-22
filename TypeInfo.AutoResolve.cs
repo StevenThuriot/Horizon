@@ -146,8 +146,16 @@ namespace Horizon
         {
             return TypeInfo<T>.TryRemoveEventHandler(instance, @event, delegates);
         }
+        
+        public static object GetValue<T>(this T instance, string propertyOrField)
+        {
+            return TypeInfo<T>.GetValue(instance, propertyOrField);
+        }
 
-
+        public static bool TryGetValue<T>(this T instance, string propertyOrField, out object result)
+        {
+            return TypeInfo<T>.TryGetValue(instance, propertyOrField, out result);
+        }
 
 
 
