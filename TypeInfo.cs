@@ -34,14 +34,12 @@ namespace Horizon
                 if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
                 {
                     var propertyInfo = (PropertyInfo) member;
-                    var caller = new PropertyCaller<T>(propertyInfo);
-                    _properties.Add(key, caller);
+                    _properties[key] = new PropertyCaller<T>(propertyInfo);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
                     var fieldInfo = (FieldInfo)member;
-                    var caller = new MemberCaller<T>(fieldInfo);
-                    _fields.Add(key, caller);
+                    _fields[key] = new MemberCaller<T>(fieldInfo);
                 }
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
