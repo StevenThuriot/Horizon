@@ -3,10 +3,9 @@ using System.Reflection;
 
 namespace Horizon
 {
-	struct SimpleParameterInfo
+	partial class SimpleParameterInfo
     {
-        public SimpleParameterInfo(string name, object defaultValue, Type parameterType, Type originalParameterType,
-                                   bool hasDefaultValue)
+        public SimpleParameterInfo(string name, object defaultValue, Type parameterType, Type originalParameterType, bool hasDefaultValue)
         {
             Name = name;
             DefaultValue = defaultValue;
@@ -21,9 +20,7 @@ namespace Horizon
         }
 
         public SimpleParameterInfo(ParameterInfo parameterInfo)
-            : this(
-                parameterInfo.Name, parameterInfo.HasDefaultValue ? parameterInfo.DefaultValue : null,
-                parameterInfo.ParameterType, parameterInfo.HasDefaultValue)
+            : this(parameterInfo.Name, parameterInfo.HasDefaultValue ? parameterInfo.DefaultValue : null, parameterInfo.ParameterType, parameterInfo.HasDefaultValue)
         {
         }
 
