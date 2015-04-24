@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Horizon
 {
     [DebuggerDisplay("{GetType().Name} - {Info.ToString()}")]
-    class MethodCaller : IInternalCaller
+    class MethodCaller : IMethodCaller
 	{
         public static MethodCaller Create(MethodInfo info)
         {

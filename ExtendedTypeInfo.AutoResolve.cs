@@ -9,7 +9,7 @@ namespace Horizon
     {
         public static class Extended
         {
-            public static IEnumerable<ICaller> Methods<T>(T instance)
+            public static IEnumerable<IMethodCaller> Methods<T>(T instance)
             {
                 return TypeInfo<T>.Extended.Methods;
             }
@@ -25,14 +25,23 @@ namespace Horizon
             }
 
 
-            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> Getters<T>(T instance)
+            public static IEnumerable<IPropertyCaller<T>> Properties<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Getters;
+                return TypeInfo<T>.Extended.Properties;
             }
 
-            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> Setters<T>(T instance)
+            public static IEnumerable<IMemberCaller<T>> Fields<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Setters;
+                return TypeInfo<T>.Extended.Fields;
+            }
+
+            public static IEnumerable<IMemberCaller<T>> Members<T>(T instance)
+            {
+                foreach (var caller in TypeInfo<T>.Extended.Properties)
+                    yield return caller;
+
+                foreach (var caller in TypeInfo<T>.Extended.Fields)
+                    yield return caller;
             }
 
 
@@ -41,7 +50,7 @@ namespace Horizon
 
 
 
-            public static IEnumerable<ICaller> Methods(Type type)
+            public static IEnumerable<IMethodCaller> Methods(Type type)
             {
                 return ResolveCallForType(type, _methodCache);
             }
@@ -55,15 +64,24 @@ namespace Horizon
             {
                 return ResolveCallForType(type, _eventCache);
             }
-            
-            public static dynamic Getters(Type type)
+
+            public static IEnumerable<IPropertyCaller> Properties(Type type)
             {
-                return DynamicResolveCallForType(type, _getterCache);
+                return ResolveCallForType(type, _propertyCache);
             }
 
-            public static dynamic Setters(Type type)
+            public static IEnumerable<IMemberCaller> Fields(Type type)
             {
-                return DynamicResolveCallForType(type, _setterCache);
+                return ResolveCallForType(type, _fieldCache);
+            }
+
+            public static IEnumerable<IMemberCaller> Members(Type type)
+            {
+                foreach (var property in Properties(type))
+                    yield return property;
+
+                foreach (var property in Fields(type))
+                    yield return property;
             }
 
 
@@ -72,12 +90,11 @@ namespace Horizon
 
 
 
-
-            private static readonly Dictionary<Type, Func<IEnumerable<MethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<MethodCaller>>>();
-            private static readonly Dictionary<Type, Func<IEnumerable<ConstructorCaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ConstructorCaller>>>();
-            private static readonly Dictionary<Type, Func<IEnumerable<EventCaller>>> _eventCache = new Dictionary<Type, Func<IEnumerable<EventCaller>>>();
-            private static readonly Dictionary<Type, dynamic> _getterCache = new Dictionary<Type, dynamic>();
-            private static readonly Dictionary<Type, dynamic> _setterCache = new Dictionary<Type, dynamic>();
+            private static readonly Dictionary<Type, Func<IEnumerable<IMethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<IMethodCaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<ICaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ICaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<IEventCaller>>> _eventCache = new Dictionary<Type, Func<IEnumerable<IEventCaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<IPropertyCaller>>> _propertyCache = new Dictionary<Type, Func<IEnumerable<IPropertyCaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<IMemberCaller>>> _fieldCache = new Dictionary<Type, Func<IEnumerable<IMemberCaller>>>();
 
             private static TResult ResolveCallForType<TResult>(Type type, Dictionary<Type, Func<TResult>> cache, [CallerMemberName]string propertyName = null)
             {
@@ -88,21 +105,6 @@ namespace Horizon
                 var info = typeof (TypeInfo<>.Extended).MakeGenericType(type);
                 var property = Expression.Property(null, info, propertyName);
                 var lambda = Expression.Lambda<Func<TResult>>(property);
-
-                cache[type] = enumerator = lambda.Compile();
-
-                return enumerator();
-            }
-
-            private static dynamic DynamicResolveCallForType(Type type, Dictionary<Type, dynamic> cache, [CallerMemberName]string propertyName = null)
-            {
-                dynamic enumerator;
-                if (cache.TryGetValue(type, out enumerator))
-                    return enumerator();
-
-                var info = typeof (TypeInfo<>.Extended).MakeGenericType(type);
-                var property = Expression.Property(null, info, propertyName);
-                var lambda = Expression.Lambda(property);
 
                 cache[type] = enumerator = lambda.Compile();
 

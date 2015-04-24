@@ -13,5 +13,7 @@ namespace Horizon
         /// In this case, this property will be false and call invocation will be infered to the <see cref="NullCaller"/>.
         /// </summary>
         bool CanRaise { get; }
+
+        Type EventHandlerType { get; }
     }
 }

@@ -7,7 +7,7 @@ namespace Horizon
 {
 	static class CallerSelector
 	{
-		private static bool CompareParameters(IReadOnlyList<Argument> parameters, IInternalCaller key, out IEnumerable<SelectableArgument> arguments)
+		private static bool CompareParameters(IReadOnlyList<Argument> parameters, ICaller key, out IEnumerable<SelectableArgument> arguments)
 		{
 			var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
 			                             .ToList();
@@ -47,7 +47,7 @@ namespace Horizon
 
 		private static readonly Stack<string> EmptyStack = new Stack<string>();
 
-		public static Tuple<IInternalCaller, List<dynamic>> SelectMethod(IEnumerable<IInternalCaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
@@ -56,7 +56,7 @@ namespace Horizon
 			return SelectMethod(callers, arguments, EmptyStack);
 		}
 
-		public static Tuple<IInternalCaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<IInternalCaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
@@ -69,7 +69,7 @@ namespace Horizon
 			return SelectMethod(callers, arguments, names);
 		}
 
-		private static Tuple<IInternalCaller, List<dynamic>> SelectMethod(IEnumerable<IInternalCaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
+        private static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
 		{
 			var list = new List<Argument>();
 			//Named parameters can always be mapped directly on the last parameters.

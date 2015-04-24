@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Horizon
 {
-    class ConstructorCaller : IInternalCaller
+    class ConstructorCaller : ICaller
     {
         protected readonly ConstructorInfo Info;
 

@@ -14,16 +14,11 @@ namespace Horizon
         private static readonly ILookup<string, MethodCaller> _methods;
 
 	    private static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
-
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> _getFields = new Dictionary<string, Lazy<Func<T, object>>>();
-
-        private static readonly Dictionary<string, Lazy<Func<T, object>>> _getProperties = new Dictionary<string, Lazy<Func<T, object>>>();
-
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> _setFields = new Dictionary<string, Lazy<Action<T, object>>>();
-
-        private static readonly Dictionary<string, Lazy<Action<T, object>>> _setProperties = new Dictionary<string, Lazy<Action<T, object>>>();
-
+        
         private static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
+
+        private static readonly Dictionary<string, PropertyCaller<T>> _properties = new Dictionary<string, PropertyCaller<T>>();
+        private static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
         
 
         static TypeInfo()
@@ -39,20 +34,14 @@ namespace Horizon
                 if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
                 {
                     var propertyInfo = (PropertyInfo) member;
-                    if (propertyInfo.CanWrite)
-                        _setProperties[key] = InvokeHelper<T>.CreateSetterLazy(propertyInfo);
-
-                    if (propertyInfo.CanRead)
-                        _getProperties[key] = InvokeHelper<T>.CreateGetterLazy(propertyInfo);
+                    var caller = new PropertyCaller<T>(propertyInfo);
+                    _properties.Add(key, caller);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
-                    var fieldInfo = (FieldInfo) member;
-
-                    if (!fieldInfo.IsInitOnly)
-                        _setFields[key] = InvokeHelper<T>.CreateSetterLazy(fieldInfo);
-
-                    _getFields[key] = InvokeHelper<T>.CreateGetterLazy(fieldInfo);
+                    var fieldInfo = (FieldInfo)member;
+                    var caller = new MemberCaller<T>(fieldInfo);
+                    _fields.Add(key, caller);
                 }
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
@@ -81,29 +70,29 @@ namespace Horizon
 			}
             
             _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
-                             .ToLookup(x => x.Name, x => x);
+                              .ToLookup(x => x.Name, x => x);
 
             _events = events.ToDictionary(x => x.Name);
         }
 
         public static object GetProperty(T instance, string property)
         {
-            return _getProperties[property].Value(instance);
+            return _properties[property].Get(instance);
         }
 
         public static object GetField(T instance, string field)
         {
-            return _getFields[field].Value(instance);
+            return _fields[field].Get(instance);
         }
 
         public static void SetProperty(T instance, string property, object value)
         {
-            _setProperties[property].Value(instance, value);
+            _properties[property].Set(instance, value);
         }
 
         public static void SetField(T instance, string field, object value)
         {
-            _setFields[field].Value(instance, value);
+            _fields[field].Set(instance, value);
         }
 
         public static void RaiseEvent(T instance, string @event, params dynamic[] arguments)
@@ -125,28 +114,23 @@ namespace Horizon
 
         public static object GetValue(T instance, string propertyOrField)
         {
-            Lazy<Func<T, object>> getter;
-            if (_getProperties.TryGetValue(propertyOrField, out getter))
-                return getter.Value(instance);
+            PropertyCaller<T> getter;
+            if (_properties.TryGetValue(propertyOrField, out getter))
+                return getter.Get(instance);
 
-            return _getFields[propertyOrField].Value(instance);
+            return _fields[propertyOrField].Get(instance);
         }
 
 
         public static bool TryGetValue(T instance, string propertyOrField, out object result)
         {
-            Lazy<Func<T, object>> getter;
-            if (_getProperties.TryGetValue(propertyOrField, out getter))
-            {
-                result = getter.Value(instance);
-                return true;
-            }
+            PropertyCaller<T> propGetter;
+            if (_properties.TryGetValue(propertyOrField, out propGetter))
+                return propGetter.TryGet(instance, out result);
 
-            if (_getFields.TryGetValue(propertyOrField, out getter))
-            {
-                result = getter.Value(instance);
-                return true;
-            }
+            MemberCaller<T> fieldGetter;
+            if (_fields.TryGetValue(propertyOrField, out fieldGetter))
+                return fieldGetter.TryGet(instance, out result);
 
             result = null;
             return false;
@@ -158,12 +142,9 @@ namespace Horizon
 
         public static bool TryGetProperty(T instance, string property, out object result)
         {
-            Lazy<Func<T, object>> getter;
-            if (_getProperties.TryGetValue(property, out getter))
-            {
-                result = getter.Value(instance);
-                return true;
-            }
+            PropertyCaller<T> getter;
+            if (_properties.TryGetValue(property, out getter))
+                return getter.TryGet(instance, out result);
 
             result = null;
             return false;
@@ -171,12 +152,9 @@ namespace Horizon
 
         public static bool TryGetField(T instance, string field, out object result)
         {
-            Lazy<Func<T, object>> getter;
-            if (_getFields.TryGetValue(field, out getter))
-            {
-                result = getter.Value(instance);
-                return true;
-            }
+            MemberCaller<T> getter;
+            if (_fields.TryGetValue(field, out getter))
+                return getter.TryGet(instance, out result);
 
             result = null;
             return false;
@@ -196,26 +174,14 @@ namespace Horizon
 
         public static bool TrySetProperty(T instance, string property, object value)
         {
-            Lazy<Action<T, object>> setter;
-            if (_setProperties.TryGetValue(property, out setter))
-            {
-                setter.Value(instance, value);
-                return true;
-            }
-
-            return false;
+            PropertyCaller<T> setter;
+            return _properties.TryGetValue(property, out setter) && setter.TrySet(instance, value);
         }
 
         public static bool TrySetField(T instance, string field, object value)
         {
-            Lazy<Action<T, object>> setter;
-            if (_setFields.TryGetValue(field, out setter))
-            {
-                setter.Value(instance, value);
-                return true;
-            }
-
-            return false;
+            MemberCaller<T> setter;
+            return _fields.TryGetValue(field, out setter) && setter.TrySet(instance, value);
         }
 
         public static void SetIndexer(T instance, object[] indexes, object value)
@@ -341,22 +307,22 @@ namespace Horizon
 
         public static bool HasGetterProperty(string property)
         {
-            return _getProperties.ContainsKey(property);
+            return _properties.ContainsKey(property);
         }
 
         public static bool HasSetterProperty(string property)
         {
-            return _setProperties.ContainsKey(property);
+            return _properties.ContainsKey(property);
         }
 
         public static bool HasGetterField(string field)
         {
-            return _getFields.ContainsKey(field);
+            return _fields.ContainsKey(field);
         }
 
         public static bool HasSetterField(string field)
         {
-            return _setFields.ContainsKey(field);
+            return _fields.ContainsKey(field);
         }
 
         public static bool HasMethod(string method)

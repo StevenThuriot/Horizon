@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Horizon
@@ -9,7 +7,7 @@ namespace Horizon
     {
         public static class Extended
         {
-            public static IEnumerable<ICaller> Methods
+            public static IEnumerable<IMethodCaller> Methods
             {
                 get { return _methods.SelectMany(callers => callers); }
             }
@@ -24,56 +22,26 @@ namespace Horizon
                 get { return _events.Values; }
             }
 
-            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> Getters
+            public static IEnumerable<IPropertyCaller<T>> Properties
+            {
+                get { return _properties.Values; }
+            }
+
+            public static IEnumerable<IMemberCaller<T>> Fields
+            {
+                get { return _fields.Values; }
+            }
+
+            public static IEnumerable<IMemberCaller<T>> Members
             {
                 get
                 {
-                    foreach (var property in _getProperties)
-                    {
-                        yield return property;
-                    }
+                    foreach (var caller in _properties.Values)
+                        yield return caller;
 
-                    foreach (var field in _getFields)
-                    {
-                        yield return field;
-                    }
+                    foreach (var caller in _fields.Values)
+                        yield return caller;
                 }
-            }
-
-            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> Setters
-            {
-                get
-                {
-                    foreach (var property in _setProperties)
-                    {
-                        yield return property;
-                    }
-
-                    foreach (var field in _setFields)
-                    {
-                        yield return field;
-                    }
-                }
-            }
-
-            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> FieldGetters
-            {
-                get { return new ReadOnlyDictionary<string, Lazy<Func<T, object>>>(_getFields); }
-            }
-
-            public static IEnumerable<KeyValuePair<string, Lazy<Func<T, object>>>> PropertyGetters
-            {
-                get { return new ReadOnlyDictionary<string, Lazy<Func<T, object>>>(_getProperties); }
-            }
-
-            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> FieldSetters
-            {
-                get { return new ReadOnlyDictionary<string, Lazy<Action<T, object>>>(_setFields); }
-            }
-
-            public static IEnumerable<KeyValuePair<string, Lazy<Action<T, object>>>> PropertySetters
-            {
-                get { return new ReadOnlyDictionary<string, Lazy<Action<T, object>>>(_setProperties); }
             }
         }
     }

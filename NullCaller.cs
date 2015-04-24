@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Horizon
 {
-    class NullCaller : IInternalCaller
+    class NullCaller : IMethodCaller
     {
-        public static IInternalCaller Instance = new NullCaller();
+        public static IMethodCaller Instance = new NullCaller();
 
         private NullCaller()
         {
@@ -22,5 +23,10 @@ namespace Horizon
         public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
 
         public bool IsStatic { get { return false; }}
+
+        public Type ReturnType
+        {
+            get { return Constants.ObjectType; }
+        }
     }
 }

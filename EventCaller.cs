@@ -4,15 +4,16 @@ using System.Reflection;
 
 namespace Horizon
 {
-    class EventCaller : IInternalCaller, IEventCaller
+    class EventCaller : IEventCaller
     {
         private readonly EventInfo _info;
 
-        private readonly IInternalCaller _raise;
+        private readonly IMethodCaller _raise;
         private readonly ICaller _add;
         private readonly ICaller _remove;
 
         public bool CanRaise { get; private set; }
+        public Type EventHandlerType { get { return _info.EventHandlerType; }}
 
         public EventCaller(EventInfo info)
         {
