@@ -12,7 +12,7 @@ namespace Horizon
                 get { return _methods.SelectMany(callers => callers); }
             }
 
-            public static IEnumerable<ICaller> Constructors
+            public static IEnumerable<IConstructorCaller> Constructors
             {
                 get { return _constructors.AsReadOnly(); }
             }

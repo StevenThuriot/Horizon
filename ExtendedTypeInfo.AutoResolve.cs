@@ -14,7 +14,7 @@ namespace Horizon
                 return TypeInfo<T>.Extended.Methods;
             }
 
-            public static IEnumerable<ICaller> Constructors<T>(T instance)
+            public static IEnumerable<IConstructorCaller> Constructors<T>(T instance)
             {
                 return TypeInfo<T>.Extended.Constructors;
             }
@@ -55,7 +55,7 @@ namespace Horizon
                 return ResolveCallForType(type, _methodCache);
             }
 
-            public static IEnumerable<ICaller> Constructors(Type type)
+            public static IEnumerable<IConstructorCaller> Constructors(Type type)
             {
                 return ResolveCallForType(type, _ctorCache);
             }
@@ -91,7 +91,7 @@ namespace Horizon
 
 
             private static readonly Dictionary<Type, Func<IEnumerable<IMethodCaller>>> _methodCache = new Dictionary<Type, Func<IEnumerable<IMethodCaller>>>();
-            private static readonly Dictionary<Type, Func<IEnumerable<ICaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<ICaller>>>();
+            private static readonly Dictionary<Type, Func<IEnumerable<IConstructorCaller>>> _ctorCache = new Dictionary<Type, Func<IEnumerable<IConstructorCaller>>>();
             private static readonly Dictionary<Type, Func<IEnumerable<IEventCaller>>> _eventCache = new Dictionary<Type, Func<IEnumerable<IEventCaller>>>();
             private static readonly Dictionary<Type, Func<IEnumerable<IPropertyCaller>>> _propertyCache = new Dictionary<Type, Func<IEnumerable<IPropertyCaller>>>();
             private static readonly Dictionary<Type, Func<IEnumerable<IMemberCaller>>> _fieldCache = new Dictionary<Type, Func<IEnumerable<IMemberCaller>>>();

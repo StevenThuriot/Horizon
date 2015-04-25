@@ -117,9 +117,18 @@ namespace Horizon
             return TypeInfo<T>.TryImplicitConvert(instance, type, out result);
 		}
 
-        public static IEnumerable<ICaller> GetMethod<T>(this T instance, string method)
+        public static IEnumerable<IMethodCaller> GetMethod<T>(this T instance, string method)
 		{
 			return TypeInfo<T>.GetMethod(method);
+        }
+
+        public static IMethodCaller GetSpecificMethod<T>(this T instance, string method, params Type[] arguments)
+		{
+            return TypeInfo<T>.GetSpecificMethod(method, arguments);
+        }
+        public static IConstructorCaller GetConstructor<T>(this T instance, params Type[] arguments)
+		{
+            return TypeInfo<T>.GetConstructor(arguments);
         }
 
         public static bool HasEvent<T>(this T instance, string @event)

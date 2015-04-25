@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Horizon
 {
@@ -27,6 +28,11 @@ namespace Horizon
         public Type ReturnType
         {
             get { return Constants.ObjectType; }
+        }
+
+        public MethodInfo MethodInfo
+        {
+            get { return null; }
         }
     }
 }

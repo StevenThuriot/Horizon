@@ -5,9 +5,11 @@ using System.Reflection;
 
 namespace Horizon
 {
-    class ConstructorCaller : ICaller
+    class ConstructorCaller : IConstructorCaller
     {
-        protected readonly ConstructorInfo Info;
+        private readonly ConstructorInfo _info;
+
+        public ConstructorInfo ConstructorInfo { get { return _info; } }
 
         public string Name { get; private set; }
         private readonly Lazy<Delegate> _caller;
@@ -20,7 +22,7 @@ namespace Horizon
 
         protected ConstructorCaller(ConstructorInfo info, IEnumerable<SimpleParameterInfo> parameterTypes)
         {
-            Info = info;
+            _info = info;
             Name = info.Name;
             ParameterTypes = parameterTypes.ToArray();
         }
@@ -29,7 +31,7 @@ namespace Horizon
 
         public bool IsStatic
         {
-            get { return Info.IsStatic; }
+            get { return _info.IsStatic; }
         }
 
         public virtual object Call(IEnumerable<dynamic> values)

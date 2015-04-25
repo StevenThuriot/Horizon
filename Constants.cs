@@ -18,8 +18,7 @@ namespace Horizon
         internal class Typed<T>
         {
             public static readonly Type OwnerType = typeof (T);
-            public static readonly IReadOnlyCollection<Type> ArgTypes = new[] {OwnerType, ObjectArrayType};
-
+            
             private static bool? _isGenericDictionary;
             public static bool IsGenericDictionary
             {

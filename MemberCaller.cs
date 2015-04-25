@@ -5,12 +5,14 @@ namespace Horizon
 {
     class MemberCaller<T> : IMemberCaller<T>
     {
+        protected readonly MemberInfo _info;
         private readonly Lazy<Action<T, object>> _setter;
         private readonly Lazy<Func<T, object>> _getter;
 
         public readonly bool CanWrite;
         public readonly bool CanRead;
 
+        public MemberInfo MemberInfo { get { return _info; } }
         public string Name { get; private set; }
         public Type MemberType { get; private set; }
         public bool IsProperty { get; private set; }
@@ -18,6 +20,7 @@ namespace Horizon
 
         private MemberCaller(MemberInfo info)
         {
+            _info = info;
             Name = info.Name;
         }
 

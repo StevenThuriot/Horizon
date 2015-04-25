@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Horizon
 {
-    [DebuggerDisplay("{GetType().Name} - {Info.ToString()}")]
+    [DebuggerDisplay("{GetType().Name} - {_info.ToString()}")]
     class MethodCaller : IMethodCaller
 	{
         public static MethodCaller Create(MethodInfo info)
@@ -26,7 +26,9 @@ namespace Horizon
 	    private readonly Lazy<Delegate> _caller;
         private readonly Lazy<bool> _isAsync;
 
-        protected readonly MethodInfo Info;
+        protected readonly MethodInfo _info;
+
+
 
         internal MethodCaller(MethodInfo info)
             : this(info, info.GetParameters().Select(x =>new SimpleParameterInfo(x)))
@@ -36,7 +38,7 @@ namespace Horizon
 
         protected MethodCaller(MethodInfo info, IEnumerable<SimpleParameterInfo> parameterTypes)
         {
-            Info = info;
+            _info = info;
             Name = info.Name;
 			ParameterTypes = parameterTypes.ToArray();
             _isAsync = new Lazy<bool>(() => typeof(Task).IsAssignableFrom(info.ReturnType));
@@ -49,12 +51,17 @@ namespace Horizon
 
         public bool IsStatic
         {
-            get { return Info.IsStatic; }
+            get { return _info.IsStatic; }
         }
 
         public Type ReturnType
         {
-            get { return Info.ReturnType; }
+            get { return _info.ReturnType; }
+        }
+
+        public MethodInfo MethodInfo
+        {
+            get { return _info; }
         }
 
 

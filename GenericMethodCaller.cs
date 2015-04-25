@@ -45,7 +45,7 @@ namespace Horizon
             Delegate @delegate;
             if (!_cache.TryGetValue(hash, out @delegate))
             {
-                @delegate = Info.BuildCallSite(arguments);
+                @delegate = _info.BuildCallSite(arguments);
                 _cache[hash] = @delegate;
             }
 

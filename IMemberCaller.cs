@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace Horizon
 {
@@ -11,6 +12,7 @@ namespace Horizon
     }
     partial interface IMemberCaller
     {
+        MemberInfo MemberInfo { get; }
         string Name { get; }
         Type MemberType { get; }
         bool IsProperty { get; }

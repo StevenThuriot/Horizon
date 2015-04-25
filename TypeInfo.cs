@@ -328,9 +328,21 @@ namespace Horizon
             return _methods.Contains(method);
         }
         
-        public static IEnumerable<ICaller> GetMethod(string method)
+        public static IEnumerable<IMethodCaller> GetMethod(string method)
         {
             return _methods[method];
+        }
+
+        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments)
+        {
+            return _methods[method].Where(x => x.ParameterTypes.Count == arguments.Length)
+                                   .First(x => arguments.Where((a,i) => x.ParameterTypes[i].ParameterType == a).Count() == arguments.Length);
+        }
+        
+        public static IConstructorCaller GetConstructor(params Type[] arguments)
+        {
+            return _constructors.Where(x => x.ParameterTypes.Count == arguments.Length)
+                                .First(x => arguments.Where((a,i) => x.ParameterTypes[i].ParameterType == a).Count() == arguments.Length);
         }
 
         public static bool HasEvent(string @event)
