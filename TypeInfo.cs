@@ -333,18 +333,6 @@ namespace Horizon
             return _methods[method];
         }
 
-        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments)
-        {
-            return _methods[method].Where(x => x.ParameterTypes.Count == arguments.Length)
-                                   .First(x => arguments.Where((a,i) => x.ParameterTypes[i].ParameterType == a).Count() == arguments.Length);
-        }
-        
-        public static IConstructorCaller GetConstructor(params Type[] arguments)
-        {
-            return _constructors.Where(x => x.ParameterTypes.Count == arguments.Length)
-                                .First(x => arguments.Where((a,i) => x.ParameterTypes[i].ParameterType == a).Count() == arguments.Length);
-        }
-
         public static bool HasEvent(string @event)
         {
             return _events.ContainsKey(@event);
@@ -353,6 +341,41 @@ namespace Horizon
         public static IEventCaller GetEvent(string @event)
         {
             return _events[@event];
+        }
+
+        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments)
+        {
+            return ResolveSpecificCaller(_methods[method], arguments);
+        }
+
+        public static IConstructorCaller GetConstructor(params Type[] arguments)
+        {
+            return ResolveSpecificCaller(_constructors, arguments);
+        }
+
+        //Simple specific version of the caller selector which enforces types and argument count.
+        private static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments)
+            where TCaller : ICaller
+        {
+            foreach (var caller in callers.Where(x => x.ParameterTypes.Count == arguments.Count))
+            {
+                var parameterTypes = caller.ParameterTypes;
+
+                var match = true;
+                for (var i = 0; i < arguments.Count; i++)
+                {
+                    var argument = arguments[i];
+                    var simpleParameterInfo = parameterTypes[i];
+                    if (simpleParameterInfo.ParameterType == argument) continue;
+
+                    match = false;
+                    break;
+                }
+
+                if (match) return caller;
+            }
+
+            throw new ArgumentException("No matching caller found.");
         }
 
 
