@@ -11,6 +11,8 @@ namespace Horizon
 {
 	static partial class InvokeHelper
     {
+        private static readonly Type _voidType = typeof(void);
+
         public static Lazy<Delegate> BuildLazy(this MethodInfo method)
         {
             return new Lazy<Delegate>(() => Build(method));
@@ -63,9 +65,9 @@ namespace Horizon
 
 
             Expression wrapper;
-            if (method.ReturnType == Constants.VoidType)
+            if (method.ReturnType == _voidType)
             {
-                var returnLabel = Expression.Label(Expression.Label(Constants.ObjectType, "result"),
+                var returnLabel = Expression.Label(Expression.Label(typeof(object), "result"),
                                                    Expression.Constant(null));
 
                 wrapper = Expression.Block
@@ -114,7 +116,7 @@ namespace Horizon
                 var argument = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null);
                 argumentInfo.Add(argument);
             }
-            var hasReturnType = method.ReturnType != Constants.VoidType;
+            var hasReturnType = method.ReturnType != _voidType;
 
 	        var binderFlags = hasReturnType ? CSharpBinderFlags.None : CSharpBinderFlags.ResultDiscarded;
 	        var callSiteBinder = Binder.InvokeMember(binderFlags, method.Name, null, method.DeclaringType, argumentInfo);
@@ -131,7 +133,7 @@ namespace Horizon
                 parameters.Add(Expression.Constant(method.DeclaringType));
             
             for (var i = 0; i < argumentCounter; i++)
-                parameters.Add(Expression.Parameter(Constants.ObjectType));
+                parameters.Add(Expression.Parameter(typeof(object)));
 
             var target = Expression.Field(callsite, "Target");
             var call = Expression.Invoke(target, parameters);
@@ -217,9 +219,9 @@ namespace Horizon
             if (info.IsStatic)
                 throw new NotSupportedException("Static fields are not supported.");
 
-            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var parameter = Expression.Parameter(typeof(T), "instance");
             var memberExpression = Expression.Field(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, Constants.ObjectType);
+            var boxExpression = Expression.Convert(memberExpression, typeof(object));
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
@@ -230,7 +232,7 @@ namespace Horizon
             if (info.IsStatic)
                 throw new NotSupportedException("Static fields are not supported.");
 
-            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var parameter = Expression.Parameter(typeof(T), "instance");
             var memberExpression = Expression.Field(parameter, info);
             return BuildSetter(parameter, memberExpression, info.FieldType);
         }
@@ -240,9 +242,9 @@ namespace Horizon
             if (IsStatic(info))
                 throw new NotSupportedException("Static fields are not supported.");
 
-            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var parameter = Expression.Parameter(typeof(T), "instance");
             var memberExpression = Expression.Property(parameter, info);
-            var boxExpression = Expression.Convert(memberExpression, Constants.ObjectType);
+            var boxExpression = Expression.Convert(memberExpression, typeof(object));
             var lambda = Expression.Lambda<Func<T, object>>(boxExpression, parameter);
 
             return lambda.Compile();
@@ -253,7 +255,7 @@ namespace Horizon
             if (IsStatic(info))
                 throw new NotSupportedException("Static fields are not supported.");
 
-            var parameter = Expression.Parameter(Constants.Typed<T>.OwnerType, "instance");
+            var parameter = Expression.Parameter(typeof(T), "instance");
             var memberExpression = Expression.Property(parameter, info);
             return BuildSetter(parameter, memberExpression, info.PropertyType);
         }
@@ -262,7 +264,7 @@ namespace Horizon
         private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression,
                                                      Type valueType)
         {
-            var value = Expression.Parameter(Constants.ObjectType, "value");
+            var value = Expression.Parameter(typeof(object), "value");
             var unboxedValue = Expression.Convert(value, valueType);
             var assign = Expression.Assign(memberExpression, unboxedValue);
 

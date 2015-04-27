@@ -178,7 +178,7 @@ namespace Horizon
 		        return creator(args);
 
 		    var info = typeof (TypeInfo<>).MakeGenericType(type);
-		    var parameter = Expression.Parameter(Constants.ObjectArrayType, "arguments");
+            var parameter = Expression.Parameter(typeof(object[]), "arguments");
 		    var call = Expression.Call(info, "Create", null, parameter);
 		    var lambda = Expression.Lambda<Func<object[], dynamic>>(call, parameter);
             _creatorCache[type] = creator = lambda.Compile();

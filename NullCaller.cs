@@ -27,7 +27,7 @@ namespace Horizon
 
         public Type ReturnType
         {
-            get { return Constants.ObjectType; }
+            get { return typeof(object); }
         }
 
         public MethodInfo MethodInfo

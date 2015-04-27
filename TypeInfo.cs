@@ -26,7 +26,7 @@ namespace Horizon
             var methods = new List<MethodCaller>();
             var events = new List<EventCaller>();
 
-            foreach (var member in Constants.Typed<T>.OwnerType.GetMembers(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static //default getMember flags
+            foreach (var member in typeof(T).GetMembers(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static //default getMember flags
                                                                                 | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)) //Our additional flags
             {
                 var key = member.Name;
@@ -420,7 +420,7 @@ namespace Horizon
         private static MethodCaller Findop_Implicit(Type type)
         {
             var methods = _methods["op_Implicit"];
-            var owner = Constants.Typed<T>.OwnerType;
+            var owner = typeof(T);
             var method = methods.FirstOrDefault(x => x.ReturnType == type && x.ParameterTypes[0].ParameterType == owner);
 
             return method;

@@ -36,9 +36,10 @@ namespace Horizon
         public override object Call(IEnumerable<dynamic> values)
         {
             var arguments = values.ToArray();
+            var objectType = typeof (object);
 
             var types = arguments.Cast<object>()
-                                 .Select(x => Reference.IsNull(x) ? Constants.ObjectType : x.GetType());
+                                 .Select(x => Reference.IsNull(x) ? objectType : x.GetType());
 
             var hash = new TypeHash(types);
 

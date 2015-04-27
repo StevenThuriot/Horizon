@@ -18,7 +18,7 @@ namespace Horizon
     {
 		public static object FastInvoke(this Delegate @delegate, params dynamic[] args)
 		{
-            if (@delegate.Method.ReturnType != Constants.VoidType)
+            if (@delegate.Method.ReturnType != _voidType)
             {
 				switch(args.Length)
 				{
@@ -75,7 +75,7 @@ namespace Horizon
 
 	    private static Type ResolveSignature(MethodInfo method, int argumentCounter)
 	    {
-	        var hasReturnType = method.ReturnType != Constants.VoidType;
+	        var hasReturnType = method.ReturnType != _voidType;
 
 	        if (method.IsStatic)
 	        {
