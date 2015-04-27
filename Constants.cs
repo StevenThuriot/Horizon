@@ -27,14 +27,10 @@ namespace Horizon
                     if (_isGenericDictionary.HasValue)
                         return _isGenericDictionary.Value;
 
-                    if (OwnerType.GetInterface(GenericDictionaryDefinition.Name) == null)
-                    {
-                        _isGenericDictionary = false;
-                        return false;
-                    }
+                    var result = OwnerType.GetInterface(GenericDictionaryDefinition.Name) != null;
+                    _isGenericDictionary = result;
 
-                    _isGenericDictionary = true;
-                    return true;
+                    return result;
                 }
             }
         }
