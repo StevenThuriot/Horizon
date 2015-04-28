@@ -37,14 +37,15 @@ Pull Request will also be accepted!
 ### Submitting a Pull Request
 Before you submit your pull request consider the following:
 
-* Search [GitHub][pulls] for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.
-* Make your changes in a new git branch:
+Search [GitHub][pulls] for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.
+
+Make your changes in a new git branch:
 
 ```
 git checkout -b my-fix-branch master
 ```
 
-* Commit your changes using a descriptive commit message.
+Commit your changes using a descriptive commit message.
 
 ```
 git commit -a
@@ -52,16 +53,16 @@ git commit -a
 
 Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
-* Push your branch to GitHub:
+Push your branch to GitHub:
 
 ```
 git push origin my-fix-branch
 ```
 
-* In GitHub, send a pull request to `Horizon:master`.
-* If we suggest changes then:
-  * Make the required updates.
-  * Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
+In GitHub, send a pull request to `Horizon:master`.
+If we suggest changes then:
+* Make the required updates.
+* Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
 ```
 git rebase master -i
@@ -75,32 +76,30 @@ That's it! Thank you for your contribution!
 After your pull request is merged, you can safely delete your branch and pull the changes
 from the main (upstream) repository:
 
-* Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
+Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
 
 ```
 git push origin --delete my-fix-branch
 ```
 
-* Check out the master branch:
+Check out the master branch:
 
 ```
 git checkout master -f
 ```
 
-* Delete the local branch:
+Delete the local branch:
 
 ```
 git branch -D my-fix-branch
 ```
 
-* Update your master with the latest upstream version:
+Update your master with the latest upstream version:
 
 ```
 git pull --ff upstream master
 ```
-	
-	
-	
-[github]: https://github.com/StevenThuriot/Horizon
-[issues]: https://github.com/StevenThuriot/Horizon/issues
-[pulls]: https://github.com/StevenThuriot/Horizon/pulls
+
+[github]: {{ site.source_link }}
+[issues]: {{ site.source_link }}/issues
+[pulls]: {{ site.source_link }}/pulls
