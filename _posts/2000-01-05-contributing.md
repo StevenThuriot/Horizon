@@ -40,33 +40,33 @@ Before you submit your pull request consider the following:
 * Search [GitHub][pulls] for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.
 * Make your changes in a new git branch:
 
-     ```shell
-     git checkout -b my-fix-branch master
-     ```
+```
+git checkout -b my-fix-branch master
+```
 
 * Commit your changes using a descriptive commit message.
 
-     ```shell
-     git commit -a
-     ```
+```
+git commit -a
+```
 
 Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
 * Push your branch to GitHub:
 
-    ```shell
-    git push origin my-fix-branch
-    ```
+```
+git push origin my-fix-branch
+```
 
 * In GitHub, send a pull request to `Horizon:master`.
 * If we suggest changes then:
   * Make the required updates.
   * Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
-    ```shell
-    git rebase master -i
-    git push origin my-fix-branch -f
-    ```
+```
+git rebase master -i
+git push origin my-fix-branch -f
+```
 
 That's it! Thank you for your contribution!
 
@@ -77,27 +77,27 @@ from the main (upstream) repository:
 
 * Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
 
-    ```shell
-    git push origin --delete my-fix-branch
-    ```
+```
+git push origin --delete my-fix-branch
+```
 
 * Check out the master branch:
 
-    ```shell
-    git checkout master -f
-    ```
+```
+git checkout master -f
+```
 
 * Delete the local branch:
 
-    ```shell
-    git branch -D my-fix-branch
-    ```
+```
+git branch -D my-fix-branch
+```
 
 * Update your master with the latest upstream version:
 
-    ```shell
-    git pull --ff upstream master
-    ```
+```
+git pull --ff upstream master
+```
 	
 	
 	
