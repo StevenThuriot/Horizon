@@ -117,6 +117,11 @@ namespace Horizon
             return TypeInfo<T>.TryImplicitConvert(instance, type, out result);
 		}
 
+        public static bool HasMethod<T>(this T instance, string method)
+        {
+            return TypeInfo<T>.HasMethod(method);
+        }
+
         public static IEnumerable<IMethodCaller> GetMethod<T>(this T instance, string method)
 		{
 			return TypeInfo<T>.GetMethod(method);
@@ -130,7 +135,6 @@ namespace Horizon
 		{
             return TypeInfo<T>.GetConstructor(arguments);
         }
-
         public static bool HasEvent<T>(this T instance, string @event)
         {
             return TypeInfo<T>.HasEvent(@event);
