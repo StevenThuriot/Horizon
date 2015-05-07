@@ -55,7 +55,7 @@ namespace Horizon
 
 		    //Resolve T through DLR
 		    dynamic dynamicValue = value;
-		    return TypeInfo.CanImplicitConvert(dynamicValue, parameterType);
+		    return Info.CanImplicitConvert(dynamicValue, parameterType);
 		}
 	}
 }

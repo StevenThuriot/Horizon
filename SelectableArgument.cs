@@ -59,7 +59,7 @@ namespace Horizon
             dynamic dynamicValue = value;
             dynamic result;
 
-            if (TypeInfo.TryImplicitConvert(dynamicValue, Type, out result))
+            if (Info.TryImplicitConvert(dynamicValue, Type, out result))
                 return result;
 
             return value;

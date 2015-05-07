@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Horizon
 {
-    static partial class TypeInfo<T>
+    static partial class Info<T>
     {
         private const string Indexer_Getter = "get_Item";
         private const string Indexer_Setter = "set_Item";
@@ -21,7 +21,7 @@ namespace Horizon
         private static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
         
 
-        static TypeInfo()
+        static Info()
         {
             var methods = new List<MethodCaller>();
             var events = new List<EventCaller>();
@@ -122,15 +122,42 @@ namespace Horizon
 
         public static bool TryGetValue(T instance, string propertyOrField, out object result)
         {
-            PropertyCaller<T> propGetter;
-            if (_properties.TryGetValue(propertyOrField, out propGetter))
-                return propGetter.TryGet(instance, out result);
+            PropertyCaller<T> prop;
+            if (_properties.TryGetValue(propertyOrField, out prop))
+                return prop.TryGet(instance, out result);
 
-            MemberCaller<T> fieldGetter;
-            if (_fields.TryGetValue(propertyOrField, out fieldGetter))
-                return fieldGetter.TryGet(instance, out result);
+            MemberCaller<T> field;
+            if (_fields.TryGetValue(propertyOrField, out field))
+                return field.TryGet(instance, out result);
 
             result = null;
+            return false;
+        }
+
+        public static void SetValue(T instance, string propertyOrField, object value)
+        {
+            PropertyCaller<T> prop;
+            if (_properties.TryGetValue(propertyOrField, out prop))
+            {
+                prop.Set(instance, value);
+            }
+            else
+            {
+                _fields[propertyOrField].Set(instance, value);
+            }
+        }
+
+
+        public static bool TrySetValue(T instance, string propertyOrField, object value)
+        {
+            PropertyCaller<T> prop;
+            if (_properties.TryGetValue(propertyOrField, out prop))
+                return prop.TrySet(instance, value);
+
+            MemberCaller<T> field;
+            if (_fields.TryGetValue(propertyOrField, out field))
+                return field.TrySet(instance, value);
+
             return false;
         }
 

@@ -5,42 +5,42 @@ using System.Runtime.CompilerServices;
 
 namespace Horizon
 {
-    static partial class TypeInfo
+    static partial class Info
     {
         public static class Extended
         {
             public static IEnumerable<IMethodCaller> Methods<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Methods;
+                return Info<T>.Extended.Methods;
             }
 
             public static IEnumerable<IConstructorCaller> Constructors<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Constructors;
+                return Info<T>.Extended.Constructors;
             }
 
             public static IEnumerable<IEventCaller> Events<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Events;
+                return Info<T>.Extended.Events;
             }
 
 
             public static IEnumerable<IPropertyCaller<T>> Properties<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Properties;
+                return Info<T>.Extended.Properties;
             }
 
             public static IEnumerable<IMemberCaller<T>> Fields<T>(T instance)
             {
-                return TypeInfo<T>.Extended.Fields;
+                return Info<T>.Extended.Fields;
             }
 
             public static IEnumerable<IMemberCaller<T>> Members<T>(T instance)
             {
-                foreach (var caller in TypeInfo<T>.Extended.Properties)
+                foreach (var caller in Info<T>.Extended.Properties)
                     yield return caller;
 
-                foreach (var caller in TypeInfo<T>.Extended.Fields)
+                foreach (var caller in Info<T>.Extended.Fields)
                     yield return caller;
             }
 
@@ -102,7 +102,7 @@ namespace Horizon
                 if (cache.TryGetValue(type, out enumerator))
                     return enumerator();
 
-                var info = typeof (TypeInfo<>.Extended).MakeGenericType(type);
+                var info = typeof (Info<>.Extended).MakeGenericType(type);
                 var property = Expression.Property(null, info, propertyName);
                 var lambda = Expression.Lambda<Func<TResult>>(property);
 

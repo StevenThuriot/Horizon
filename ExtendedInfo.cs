@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Horizon
 {
-    static partial class TypeInfo<T>
+    static partial class Info<T>
     {
         public static class Extended
         {
