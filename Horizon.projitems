@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>659f049f-2f56-4ba3-9009-739704aadb18</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>Horizon</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Argument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CallerSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConstructorCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EventCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtendedInfo.AutoResolve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtendedInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GenericMethodCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GenericType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IConstructorCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEventCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMemberCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IMethodCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Info.AutoResolve.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Info.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InvokeHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPropertyCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MemberCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MethodCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)NullCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PropertyCaller.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Reference.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SelectableArgument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleParameterInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypeHash.cs" />
+  </ItemGroup>
+</Project>
