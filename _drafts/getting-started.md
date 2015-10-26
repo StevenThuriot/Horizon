@@ -19,7 +19,7 @@ The easiest starting point is the static `Info` class. It requires a generic par
 Info<T>
 ```
 
-A static constructor will be loaded at this point, caching the information about this type once. At this point, the execution trees won't be compiled just yet, to keep the hit as small as possible. A simple [`GetMembers`](https://msdn.microsoft.com/en-us/library/k2w5ey1e.aspx) call is launched to get all the available info for the current type. This is parsed and converted to metadata Horizon can understand and work with.
+A static constructor will be loaded, caching the information about this type once. At this point, the execution trees won't be compiled just yet, to keep the hit as small as possible. A simple [`GetMembers`](https://msdn.microsoft.com/en-us/library/k2w5ey1e.aspx) call is launched to get all the available info for the current type. This is parsed and converted to metadata Horizon can understand and work with.
 
 Imagine we want to resolve the value of the field `_randomField`.
 
