@@ -43,3 +43,11 @@ var value = @class.GetField("_randomField");
 ```
 
 For obvious reasons, auto-resolving the type will have a small (almost non-existing) overhead compared to the generic call.
+
+Extended info is also available, which can be found in a static subclass.
+
+```csharp
+Info<T>.Extended
+```
+
+This static class contains a list of all the metadata Horizon is using for that type. (Methods, properties, constructors, etc)
