@@ -7,6 +7,8 @@ fa-icon: code
 
 ## Getting Started with Horizon
 
+### The basics
+
 Everything you need is in the `Horizon` namespace, so start by including it
 
 ```csharp
@@ -43,6 +45,8 @@ var value = @class.GetField("_randomField");
 ```
 
 For obvious reasons, auto-resolving the type will have a small (almost non-existing) overhead compared to the generic call.
+
+### Extended Info
 
 Extended info is also available, which can be found in a static subclass.
 
