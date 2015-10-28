@@ -55,3 +55,17 @@ Info<T>.Extended
 ```
 
 This static class contains a list of all the metadata Horizon is using for that type. (Methods, properties, constructors, etc)
+
+Just like the normal `Info` class, the `Extended` class allows you to auto-resolve the type.
+
+```csharp
+Info.Extended.Fields(@class);
+```
+
+This class also allows you to pass a `Type` instead of an instance, in case you don't have one yet.
+
+```csharp
+Info.Extended.Fields(typeof (ClassWithFields));
+```
+
+Of course, this caller will have an added performance hit since it will try to resolve the metadata through the normal handler. This way it is shared between the two. The expression tree to resolve the data will be cached, so it will be a one-time hit.
