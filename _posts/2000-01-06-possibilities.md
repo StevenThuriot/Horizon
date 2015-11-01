@@ -5,11 +5,10 @@ color: white
 fa-icon: magic
 ---
 
-## Possibilities
-
 So what can Horizon exactly do?
 
 Horizon can:
+
 - Get and Set field and property values
   - Both private as public, wether it's on a base class or not.
 - Get and Set values and guess if it's a property or field.
