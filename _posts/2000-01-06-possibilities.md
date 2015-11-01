@@ -1,6 +1,6 @@
 ---
 title: "possibilities"
-bg: turquoise
+bg: darkorange
 color: white
 fa-icon: magic
 ---
