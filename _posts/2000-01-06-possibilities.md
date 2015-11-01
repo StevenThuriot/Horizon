@@ -5,7 +5,7 @@ color: white
 fa-icon: magic
 ---
 
-So what can Horizon exactly do?
+## So what can Horizon exactly do?
 
 Horizon can:
 
