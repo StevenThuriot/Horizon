@@ -1,6 +1,6 @@
 ---
 title: "contribute"
-bg: purple
+bg: slategray
 color: white
 fa-icon: cloud-upload
 ---
