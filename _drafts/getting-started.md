@@ -69,3 +69,9 @@ Info.Extended.Fields(typeof (ClassWithFields));
 ```
 
 Of course, this caller will have an added performance hit since it will try to resolve the metadata through the normal handler. This way it is shared between the two. The expression tree to resolve the data will be cached, so it will be a one-time hit.
+
+### DLR
+
+Horizon supports .NET's DLR. This means a lot of the calls on the `Info` class have an overload that accept an implementation of the [`CallSiteBinder`](https://msdn.microsoft.com/en-us/library/system.runtime.compilerservices.callsitebinder.aspx). 
+
+In a nutshell, this means it's very easy to plug `Horizon` into any of your projects that uses [`DynamicObject`](https://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject.aspx) implementations. 
