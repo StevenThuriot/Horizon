@@ -72,6 +72,13 @@ Of course, this caller will have an added performance hit since it will try to r
 
 ### DLR
 
-Horizon supports .NET's DLR. This means a lot of the calls on the `Info` class have an overload that accept an implementation of the [`CallSiteBinder`](https://msdn.microsoft.com/en-us/library/system.runtime.compilerservices.callsitebinder.aspx). 
+Horizon supports .NET's DLR. This means a lot of the calls on the `Info` class have an overload that accept an implementation of the [`CallSiteBinder`](https://msdn.microsoft.com/en-us/library/system.runtime.compilerservices.callsitebinder.aspx).
 
-In a nutshell, this means it's very easy to plug `Horizon` into any of your projects that uses [`DynamicObject`](https://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject.aspx) implementations. 
+In a nutshell, this means it's very easy to plug `Horizon` into any of your projects that uses [`DynamicObject`](https://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject.aspx) implementations.
+
+
+### The real fancy stuff
+
+For simple calls, like getting values from fields and properties, an `Expression Tree` will be compiled and cached. After compilation, the execution hit is barely slower than making the actual call.
+
+For more advanced calls, like methods that have named arguments and parameters with default values, a `CallSiteBinder` will be constructed, just like the DLR does! That makes it just as snappy as working with a regular dynamic object.
