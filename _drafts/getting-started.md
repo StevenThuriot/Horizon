@@ -82,3 +82,5 @@ In a nutshell, this means it's very easy to plug `Horizon` into any of your proj
 For simple calls, like getting values from fields and properties, an `Expression Tree` will be compiled and cached. After compilation, the execution hit is barely slower than making the actual call.
 
 For more advanced calls, like methods that have named arguments and parameters with default values, a `CallSiteBinder` will be constructed, just like the DLR does! That makes it just as snappy as working with a regular dynamic object.
+
+Horizon is smart enough to find the correct overload to use when calling a method, even if it means having to implicitely cast an instance first. When calling a method that requires more parameters than supplied, it will check for default values first. Named arguments are also supported, so it's possible to swap instances around, just like in regular C# code.
