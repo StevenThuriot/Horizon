@@ -1,5 +1,5 @@
 ---
-title: "contribute"
+title: "Getting Started"
 bg: green
 color: white
 fa-icon: code
