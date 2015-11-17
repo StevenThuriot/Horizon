@@ -101,21 +101,19 @@ var value = @class.Call("MyMethodWithParameters", 1, "one", new OtherParameterCl
 
 When passing the `CallSiteBinder`, it will use named arguments as well. This is a sample that could be used when overriding `DynamicObject`.
 
-
 ```
-
-  public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+{
+  object output;
+  if (_realInstance.TryCall(binder, args, out output))
   {
-    object output;
-    if (Info<T>.TryCall(_instance, binder, args, out output))
-    {
-      result = output;
-      return true;
-    }
-  
-    result = null;
-    return false;
+    result = output;
+    return true;
   }
+
+  result = null;
+  return false;
+}
 
 ```
 
