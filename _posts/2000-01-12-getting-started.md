@@ -98,23 +98,3 @@ Or like this, in case you pass values:
 ```
 var value = @class.Call("MyMethodWithParameters", 1, "one", new OtherParameterClass());
 ```
-
-When passing the `CallSiteBinder`, it will use named arguments as well. This is a sample that could be used when overriding `DynamicObject`.
-
-```
-public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
-{
-  object output;
-  if (_realInstance.TryCall(binder, args, out output))
-  {
-    result = output;
-    return true;
-  }
-
-  result = null;
-  return false;
-}
-
-```
-
-Horizon will resolve the passed arguments from the binder and will call the correct overload. If the method returns a value, it will be passed as well. If not, it will pass `null`.
