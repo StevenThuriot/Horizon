@@ -279,7 +279,7 @@
 .highlight, .linenodiv {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWPQ1dU1BgABzQC7XXMTYQAAAABJRU5ErkJggg==);
   display:block;
-  padding: 10px;
+  padding: 2px;
   margin-bottom:20px;
 }
 .linenodiv, .lineno { color: #ccc; }
