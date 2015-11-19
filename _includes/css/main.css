@@ -42,7 +42,7 @@ code {
 pre code { background: none; display: block; }
 pre {
   display: block;
-  margin: 20px 5%;
+  margin: 5px;
   padding: 4px 8px;
   background: rgba(255,255,255,0.1);
   word-wrap: break-word;
