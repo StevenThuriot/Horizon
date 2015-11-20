@@ -48,7 +48,9 @@ pre {
   word-wrap: break-word;
 }
 
-.highlighttable { margin:20px 5%; }
+.highlighttable { 
+  margin:20px 5%; 
+}
 
 
 /* ----- base elements ----- */
