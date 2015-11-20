@@ -11,13 +11,13 @@ fa-icon: code
 
 Everything you need is in the `Horizon` namespace, so start by including it
 
-```
+```csharp
 using Horizon;
 ```
 
 The easiest starting point is the static `Info` class. It requires a generic parameter. The generic is the type you want to query for info.
 
-```
+```csharp
 Info<T>
 ```
 
@@ -25,7 +25,7 @@ A static constructor will be loaded, caching the information about this type onc
 
 Imagine we want to resolve the value of the field `_randomField`.
 
-```
+```csharp
 var @class = new ClassWithFields();
 var value = Info<T>.GetField(@class, "_randomField");
 ```
@@ -34,13 +34,13 @@ The field getter will only now be compiled and cached. All the other getters wil
 
 A generic type is not always a possibility. Horizon can also auto-resolve using an existing instance, instead. Continuing our previous example, it would look like this.
 
-```
+```csharp
 var value = Info.GetField(@class, "_randomField");
 ```
 
 For ease of use, it can also be invoked as an extension method.
 
-```
+```csharp
 var value = @class.GetField("_randomField");
 ```
 
@@ -50,7 +50,7 @@ For obvious reasons, auto-resolving the type will have a small (almost non-exist
 
 Extended info is also available, which can be found in a static subclass.
 
-```
+```csharp
 Info<T>.Extended
 ```
 
@@ -58,13 +58,13 @@ This static class contains a list of all the metadata Horizon is using for that 
 
 Just like the normal `Info` class, the `Extended` class allows you to auto-resolve the type.
 
-```
+```csharp
 Info.Extended.Fields(@class);
 ```
 
 This class also allows you to pass a `Type` instead of an instance, in case you don't have one yet.
 
-```
+```csharp
 Info.Extended.Fields(typeof (ClassWithFields));
 ```
 
@@ -89,12 +89,12 @@ Horizon is smart enough to find the correct overload to use when calling a metho
 
 ...Would look a little like this for a method without parameters (or one that has all defaultValues filled in):
 
-```
+```csharp
 var value = @class.Call("MyMethod");
 ```
 
 Or like this, in case you pass values:
 
-```
+```csharp
 var value = @class.Call("MyMethodWithParameters", 1, "one", new OtherParameterClass());
 ```
