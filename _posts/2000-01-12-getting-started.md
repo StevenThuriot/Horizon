@@ -1,6 +1,6 @@
 ---
 title: "Getting Started"
-bg: green
+bg: darkgreen
 color: black
 fa-icon: code
 ---
