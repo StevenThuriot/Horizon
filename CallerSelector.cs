@@ -7,45 +7,48 @@ namespace Horizon
 {
 	static class CallerSelector
 	{
-		private static bool CompareParameters(IReadOnlyList<Argument> parameters, ICaller key, out IEnumerable<SelectableArgument> arguments)
-		{
-			var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
-			                             .ToList();
+        static bool CompareParameters(IReadOnlyList<Argument> parameters, ICaller key, out IEnumerable<SelectableArgument> arguments)
+        {
+            var selectableArguments = key.ParameterTypes.Select(x => new SelectableArgument(x))
+                                         .ToList();
 
-			arguments = selectableArguments;
+            arguments = selectableArguments;
 
-			for (var i = 0; i < parameters.Count; i++)
-			{
-				var parameter = parameters[i];
+            for (var i = 0; i < parameters.Count; i++)
+            {
+                var parameter = parameters[i];
 
-				var methodParam = parameter.HasName
-					                  ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
-					                  : selectableArguments.ElementAtOrDefault(i);
-				//Unnamed params come first and in order, select by index.
+                var methodParam = parameter.HasName
+                                      ? selectableArguments.FirstOrDefault(x => x.Name == parameter.Name)
+                                      : selectableArguments.ElementAtOrDefault(i);
+                //Unnamed params come first and in order, select by index.
 
-				//Check if a param has been found.
-				if (methodParam == null) return false;
+                //Check if a param has been found.
+                if (methodParam == null)
+                    return false;
 
-				if (parameter.Type == null)
-				{
-					//If null, null has been passed so the type has to be a value type.
-					if (!methodParam.Type.IsValueType) return false;
-				}
-				else
-				{
-					//If not null, parameter has to be assignable to 
-					if (!parameter.IsAssignableTo(methodParam.Type)) return false;
-				}
+                if (parameter.Type == null)
+                {
+                    //If null, null has been passed so the type has to be a value type.
+                    if (!methodParam.Type.IsValueType)
+                        return false;
+                }
+                else
+                {
+                    //If not null, parameter has to be assignable to 
+                    if (!parameter.IsAssignableTo(methodParam.Type))
+                        return false;
+                }
 
-				//Override value with passed value
-				methodParam.SelectFor(parameter);
-			}
+                //Override value with passed value
+                methodParam.SelectFor(parameter);
+            }
 
-			return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
-		}
+            return selectableArguments.All(x => x.Selected || x.HasDefaultValue);
+        }
 
 
-		private static readonly Stack<string> EmptyStack = new Stack<string>();
+        static readonly Stack<string> EmptyStack = new Stack<string>();
 
         public static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
@@ -56,7 +59,7 @@ namespace Horizon
 			return SelectMethod(callers, arguments, EmptyStack);
 		}
 
-        public static Tuple<ICaller, List<dynamic>> SelectMethod(InvokeMemberBinder binder, IEnumerable<ICaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, List<dynamic>> SelectMethod(CallInfo callInfo, IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
@@ -64,12 +67,12 @@ namespace Horizon
 			var arguments = args.ToList();
 
 			//Build argument list from binder
-			var names = new Stack<string>(binder.CallInfo.ArgumentNames);
+			var names = new Stack<string>(callInfo.ArgumentNames);
 
 			return SelectMethod(callers, arguments, names);
 		}
 
-        private static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
+        static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
 		{
 			var list = new List<Argument>();
 			//Named parameters can always be mapped directly on the last parameters.
@@ -101,9 +104,10 @@ namespace Horizon
 
 		public static object Call(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
 		{
-			var method = SelectMethod(binder, callers, args);
+			var method = SelectMethod(binder.CallInfo, callers, args);
 
-			if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
+			if (method == null)
+                throw new ArgumentException("Invalid method name: " + binder.Name);
 
 			var caller = method.Item1;
 			var arguments = method.Item2;
@@ -113,9 +117,10 @@ namespace Horizon
 
 		public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
 		{
-			var method = SelectMethod(binder, callers, args);
+			var method = SelectMethod(binder.CallInfo, callers, args);
 
-			if (method == null) throw new ArgumentException("Invalid method name: " + binder.Name);
+			if (method == null)
+                throw new ArgumentException("Invalid method name: " + binder.Name);
 
 			var caller = method.Item1;
 			var arguments = method.Item2.ToList();
@@ -128,7 +133,7 @@ namespace Horizon
 
 		public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
 		{
-			var method = SelectMethod(binder, callers, args);
+			var method = SelectMethod(binder.CallInfo, callers, args);
 
 			if (method == null)
 			{
@@ -145,7 +150,7 @@ namespace Horizon
 
 		public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
 		{
-			var method = SelectMethod(binder, callers, args);
+			var method = SelectMethod(binder.CallInfo, callers, args);
 
 			if (method == null)
 			{
@@ -167,7 +172,8 @@ namespace Horizon
 		{
 			var method = SelectMethod(callers, args);
 
-			if (method == null) throw new ArgumentException("Invalid methodcall.");
+			if (method == null)
+                throw new ArgumentException("Invalid methodcall.");
 
 			var caller = method.Item1;
 			var arguments = method.Item2;
@@ -179,7 +185,8 @@ namespace Horizon
 		{
 			var method = SelectMethod(callers, args);
 
-			if (method == null) throw new ArgumentException("Invalid methodcall.");
+			if (method == null)
+                throw new ArgumentException("Invalid methodcall.");
 
 			var caller = method.Item1;
 			var arguments = method.Item2.ToList();
@@ -231,7 +238,8 @@ namespace Horizon
 		{
 			var method = SelectMethod(callers, indexes);
 
-			if (method == null) throw new ArgumentException("Invalid Indexer");
+			if (method == null)
+                throw new ArgumentException("Invalid Indexer");
 
 			var caller = method.Item1;
 			var arguments = method.Item2.ToList();
@@ -249,7 +257,8 @@ namespace Horizon
 
 			var method = SelectMethod(callers, input);
 
-			if (method == null) throw new ArgumentException("Invalid Indexer");
+			if (method == null)
+                throw new ArgumentException("Invalid Indexer");
 
 			var caller = method.Item1;
 			var arguments = method.Item2.ToList();
@@ -305,7 +314,8 @@ namespace Horizon
 		{
 			var ctor = SelectMethod(ctors, arguments);
 
-			if (ctor == null) throw new ArgumentException("Invalid Ctor");
+			if (ctor == null)
+                throw new ArgumentException("Invalid Ctor");
 
 			var caller = ctor.Item1;
 			var args = ctor.Item2.ToList();
