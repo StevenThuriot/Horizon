@@ -8,18 +8,21 @@ namespace Horizon
 {
     static partial class Info<T>
     {
-        private const string Indexer_Getter = "get_Item";
-        private const string Indexer_Setter = "set_Item";
+        const string Indexer_Getter = "get_Item";
+        const string Indexer_Setter = "set_Item";
 
-        private static readonly ILookup<string, MethodCaller> _methods;
+#pragma warning disable S2743 // Static fields should not be used in generic types
 
-	    private static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
+        static readonly ILookup<string, MethodCaller> _methods;
+
+        static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
         
-        private static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
+        static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
 
-        private static readonly Dictionary<string, PropertyCaller<T>> _properties = new Dictionary<string, PropertyCaller<T>>();
-        private static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
-        
+        static readonly Dictionary<string, PropertyCaller<T>> _properties = new Dictionary<string, PropertyCaller<T>>();
+        static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
+
+#pragma warning restore S2743 // Static fields should not be used in generic types
 
         static Info()
         {
@@ -134,6 +137,7 @@ namespace Horizon
             return false;
         }
 
+
         public static void SetValue(T instance, string propertyOrField, object value)
         {
             PropertyCaller<T> prop;
@@ -162,8 +166,12 @@ namespace Horizon
         }
 
 
+        public static object GetValue(T instance, GetMemberBinder binder) => GetValue(instance, binder.Name);
+        public static bool TryGetValue(T instance, GetMemberBinder binder, out object result) => TryGetValue(instance, binder.Name, out result);
 
-
+        public static void SetValue(T instance, SetMemberBinder binder, object value) => SetValue(instance, binder.Name, value);
+        public static bool TrySetValue(T instance, SetMemberBinder binder, object value) => TrySetValue(instance, binder.Name, value);
+        
 
         public static bool TryGetProperty(T instance, string property, out object result)
         {
@@ -290,7 +298,8 @@ namespace Horizon
         public static bool TryRaiseEvent(T instance, string @event, params dynamic[] arguments)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller)) return false;
+            if (!_events.TryGetValue(@event, out caller))
+                return false;
 
             caller.Raise(instance, arguments);
             return true;
@@ -299,7 +308,8 @@ namespace Horizon
         public static bool TryAddEventHandler(T instance, string @event, params Delegate[] delegates)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller)) return false;
+            if (!_events.TryGetValue(@event, out caller))
+                return false;
 
             caller.Add(instance, delegates);
             return true;
@@ -308,7 +318,8 @@ namespace Horizon
         public static bool TryRemoveEventHandler(T instance, string @event, params Delegate[] delegates)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller)) return false;
+            if (!_events.TryGetValue(@event, out caller))
+                return false;
 
             caller.Remove(instance, delegates);
             return true;
@@ -393,13 +404,15 @@ namespace Horizon
                 {
                     var argument = arguments[i];
                     var simpleParameterInfo = parameterTypes[i];
-                    if (simpleParameterInfo.ParameterType == argument) continue;
+                    if (simpleParameterInfo.ParameterType == argument)
+                        continue;
 
                     match = false;
                     break;
                 }
 
-                if (match) return caller;
+                if (match)
+                    return caller;
             }
 
             throw new ArgumentException("No matching caller found.");
@@ -422,7 +435,8 @@ namespace Horizon
         {
             var method = Findop_Implicit(type);
 
-            if (method == null) throw new ArgumentException("Invalid implicit conversion");
+            if (method == null)
+                throw new ArgumentException("Invalid implicit conversion");
 
             var arguments = new dynamic[] { instance };
             return method.Call(arguments);
