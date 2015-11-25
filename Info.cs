@@ -182,7 +182,7 @@ namespace Horizon
             result = null;
             return false;
         }
-
+        
         public static bool TryGetField(T instance, string field, out object result)
         {
             MemberCaller<T> getter;
@@ -192,6 +192,9 @@ namespace Horizon
             result = null;
             return false;
         }
+
+        public static object GetProperty(T instance, GetMemberBinder binder) => GetProperty(instance, binder.Name);
+        public static bool TryGetProperty(T instance, GetMemberBinder binder, out object result) => TryGetProperty(instance, binder.Name, out result);
 
         public static object GetIndexer(T instance, object[] indexes)
         {
@@ -211,11 +214,17 @@ namespace Horizon
             return _properties.TryGetValue(property, out setter) && setter.TrySet(instance, value);
         }
 
+        public static void SetProperty(T instance, SetMemberBinder binder, object value) => SetProperty(instance, binder.Name, value);
+        public static bool TrySetProperty(T instance, SetMemberBinder binder, object value) => TrySetProperty(instance, binder.Name, value);
+
         public static bool TrySetField(T instance, string field, object value)
         {
             MemberCaller<T> setter;
             return _fields.TryGetValue(field, out setter) && setter.TrySet(instance, value);
         }
+
+        public static void SetField(T instance, SetMemberBinder binder, object value) => SetField(instance, binder.Name, value);
+        public static bool TrySetField(T instance, SetMemberBinder binder, object value) => TrySetField(instance, binder.Name, value);
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
