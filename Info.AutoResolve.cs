@@ -165,7 +165,7 @@ namespace Horizon
             return Info<T>.GetValue(instance, propertyOrField);
         }
 
-        public static bool TryGetValue<T>(this T instance, string propertyOrField, object result)
+        public static bool TryGetValue<T>(this T instance, string propertyOrField, out object result)
         {
             return Info<T>.TryGetValue(instance, propertyOrField, out result);
         }
@@ -181,10 +181,24 @@ namespace Horizon
         }
 
 
+        public static object GetValue<T>(this T instance, GetMemberBinder binder) => GetValue(instance, binder.Name);
+        public static bool TryGetValue<T>(this T instance, GetMemberBinder binder, out object result) => TryGetValue(instance, binder.Name, out result);
+
+        public static void SetValue<T>(this T instance, SetMemberBinder binder, object value) => SetValue(instance, binder.Name, value);
+        public static bool TrySetValue<T>(this T instance, SetMemberBinder binder, object value) => TrySetValue(instance, binder.Name, value);
+
+        public static object GetProperty<T>(this T instance, GetMemberBinder binder) => GetProperty(instance, binder.Name);
+        public static bool TryGetProperty<T>(this T instance, GetMemberBinder binder, out object result) => TryGetProperty(instance, binder.Name, out result);
+
+        public static void SetProperty<T>(this T instance, SetMemberBinder binder, object value) => SetProperty(instance, binder.Name, value);
+        public static bool TrySetProperty<T>(this T instance, SetMemberBinder binder, object value) => TrySetProperty(instance, binder.Name, value);
+
+        public static void SetField<T>(this T instance, SetMemberBinder binder, object value) => SetField(instance, binder.Name, value);
+        public static bool TrySetField<T>(this T instance, SetMemberBinder binder, object value) => TrySetField(instance, binder.Name, value);
 
 
 
-        private static readonly Dictionary<Type, Func<object[], dynamic>> _creatorCache = new Dictionary<Type, Func<object[], dynamic>>();
+        static readonly Dictionary<Type, Func<object[], dynamic>> _creatorCache = new Dictionary<Type, Func<object[], dynamic>>();
 		public static dynamic Create(Type type, params object[] args)
 		{
 		    Func<object[], dynamic> creator;
