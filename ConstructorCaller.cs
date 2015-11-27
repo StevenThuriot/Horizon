@@ -7,12 +7,13 @@ namespace Horizon
 {
     class ConstructorCaller : IConstructorCaller
     {
-        private readonly ConstructorInfo _info;
+        readonly Lazy<Delegate> _caller;
+        readonly ConstructorInfo _info;
 
         public ConstructorInfo ConstructorInfo { get { return _info; } }
 
         public string Name { get; private set; }
-        private readonly Lazy<Delegate> _caller;
+        
 
         internal ConstructorCaller(ConstructorInfo info)
             : this(info, info.GetParameters().Select(x => new SimpleParameterInfo(x)))
@@ -29,10 +30,7 @@ namespace Horizon
 
         public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
 
-        public bool IsStatic
-        {
-            get { return _info.IsStatic; }
-        }
+        public bool IsStatic => _info.IsStatic;
 
         public virtual object Call(IEnumerable<dynamic> values)
         {
@@ -43,16 +41,19 @@ namespace Horizon
 
         public override bool Equals(object obj)
         {
-            if (Reference.IsNull(obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (Reference.IsNull(obj))
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (obj.GetType() != GetType())
+                return false;
+
             return Equals((ConstructorCaller) obj);
         }
 
-        protected bool Equals(ConstructorCaller other)
-        {
-            return string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
-        }
+        protected bool Equals(ConstructorCaller other) => string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
 
         public override int GetHashCode()
         {

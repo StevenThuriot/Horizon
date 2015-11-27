@@ -6,14 +6,14 @@ namespace Horizon
 {
     class EventCaller : IEventCaller
     {
-        private readonly EventInfo _info;
+        readonly EventInfo _info;
+        
+        readonly IMethodCaller _raise;
+        readonly ICaller _add;
+        readonly ICaller _remove;
 
-        private readonly IMethodCaller _raise;
-        private readonly ICaller _add;
-        private readonly ICaller _remove;
-
-        public bool CanRaise { get; private set; }
-        public Type EventHandlerType { get { return _info.EventHandlerType; }}
+        public bool CanRaise { get; }
+        public Type EventHandlerType => _info.EventHandlerType;
 
         public EventCaller(EventInfo info)
         {
@@ -27,10 +27,7 @@ namespace Horizon
             _remove = new MethodCaller(info.RemoveMethod);
         }
 
-        public object Call(IEnumerable<dynamic> values)
-        {
-            return _raise.Call(values);
-        }
+        public object Call(IEnumerable<dynamic> values) => _raise.Call(values);
 
         public void Raise(dynamic instance, params dynamic[] arguments)
         {
@@ -38,7 +35,8 @@ namespace Horizon
             var values = new dynamic[length + 1];
             values[0] = instance;
 
-            if (length != 0) Array.Copy(arguments, 0, values, 1, length);
+            if (length != 0)
+                Array.Copy(arguments, 0, values, 1, length);
 
             _raise.Call(values);
         }
@@ -49,7 +47,8 @@ namespace Horizon
             var values = new dynamic[length + 1];
             values[0] = instance;
 
-            if (length != 0) Array.Copy(handlers, 0, values, 1, length);
+            if (length != 0)
+                Array.Copy(handlers, 0, values, 1, length);
             
 
             _add.Call(values);
@@ -61,24 +60,16 @@ namespace Horizon
             var values = new dynamic[length + 1];
             values[0] = instance;
 
-            if (length != 0) Array.Copy(handlers, 0, values, 1, length);
+            if (length != 0)
+                Array.Copy(handlers, 0, values, 1, length);
 
             _remove.Call(values);
         }
 
-        public string Name
-        {
-            get { return _info.Name; }
-        }
+        public string Name => _info.Name;
 
-        public IReadOnlyList<SimpleParameterInfo> ParameterTypes
-        {
-            get { return _raise.ParameterTypes; }
-        }
+        public IReadOnlyList<SimpleParameterInfo> ParameterTypes => _raise.ParameterTypes;
 
-        public bool IsStatic
-        {
-            get { return false; }
-        }
+        public bool IsStatic => false;
     }
 }

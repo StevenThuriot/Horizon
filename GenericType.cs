@@ -5,8 +5,6 @@ namespace Horizon
 {
     static class GenericType
     {
-        private static readonly Type[] EmptyTypes = new Type[0];
-
         public static bool IsGenericTypeOf(this Type type, Type genericDefinition)
         {
             if (type.IsGenericType &&
@@ -24,7 +22,7 @@ namespace Horizon
 
         public static bool IsGenericTypeOf(this Type type, Type genericDefinition, out Type[] genericParameters)
         {
-            genericParameters = EmptyTypes;
+            genericParameters = Type.EmptyTypes;
 
             var isMatch = type.IsGenericType &&
                           type.GetGenericTypeDefinition() == genericDefinition.GetGenericTypeDefinition();

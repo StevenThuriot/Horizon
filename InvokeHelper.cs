@@ -7,22 +7,17 @@ using System.Runtime.CompilerServices;
 using Microsoft.CSharp.RuntimeBinder;
 using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 using System.Runtime.ExceptionServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Horizon
 {
-	static partial class InvokeHelper
+	static class InvokeHelper
     {
-        private static readonly Type _voidType = typeof(void);
+        static readonly Type _voidType = typeof(void);
 
-        public static Lazy<Delegate> BuildLazy(this MethodInfo method)
-        {
-            return new Lazy<Delegate>(() => Build(method));
-        }
+        public static Lazy<Delegate> BuildLazy(this MethodInfo method) => new Lazy<Delegate>(() => Build(method));
 
-        public static Lazy<T> BuildLazy<T>(this MethodInfo method)
-        {
-            return new Lazy<T>(() => Build<T>(method));
-        }
+        public static Lazy<T> BuildLazy<T>(this MethodInfo method) => new Lazy<T>(() => Build<T>(method));
 
         public static Delegate Build(this MethodInfo method)
         {
@@ -46,7 +41,7 @@ namespace Horizon
             return func;
         }
 
-        private static Expression BuildExpression(MethodInfo method, out IEnumerable<ParameterExpression> allParameters)
+        static Expression BuildExpression(MethodInfo method, out IEnumerable<ParameterExpression> allParameters)
         {
             var parameters = method.GetParameters()
                                    .Select(x => Expression.Parameter(x.ParameterType, x.Name))
@@ -86,7 +81,8 @@ namespace Horizon
             var parameterExpressions = parameters.ToList();
 
             var instanceExpression = call.Object as ParameterExpression;
-            if (instanceExpression != null) parameterExpressions.Insert(0, instanceExpression);
+            if (instanceExpression != null)
+                parameterExpressions.Insert(0, instanceExpression);
 
             allParameters = parameterExpressions;
             return wrapper;
@@ -145,14 +141,13 @@ namespace Horizon
         }
 
 
-		public static Lazy<Delegate> BuildLazy(this ConstructorInfo ctor)
-		{
-			return new Lazy<Delegate>(() => Build(ctor));
-		}
+        public static Lazy<Delegate> BuildLazy(this ConstructorInfo ctor) => new Lazy<Delegate>(() => Build(ctor));
 
-		public static Lazy<T> BuildLazy<T>(this ConstructorInfo ctor)
+        public static Lazy<T> BuildLazy<T>(this ConstructorInfo ctor)
 		{
-			if (ctor == null) throw new ArgumentNullException("ctor");
+			if (ctor == null)
+                throw new ArgumentNullException(nameof(ctor));
+
 			return new Lazy<T>(() => Build<T>(ctor));
 		}
 
@@ -178,7 +173,8 @@ namespace Horizon
 			return func;
 		}
 
-		private static Expression BuildExpression(ConstructorInfo ctor, out IEnumerable<ParameterExpression> allParameters)
+
+        static Expression BuildExpression(ConstructorInfo ctor, out IEnumerable<ParameterExpression> allParameters)
 		{
 			var parameters = ctor.GetParameters()
 								 .Select(x => Expression.Parameter(x.ParameterType, x.Name))
@@ -190,8 +186,7 @@ namespace Horizon
 			return caller;
 		}
 
-
-
+        [SuppressMessage("SonarLint", "S1541", Justification = "Speeding things up")]
         public static object FastInvoke(this Delegate @delegate, params dynamic[] args)
         {
             if (@delegate.Method.ReturnType != _voidType)
@@ -348,7 +343,8 @@ namespace Horizon
 
 
 
-        private static Type ResolveSignature(MethodInfo method, int argumentCounter)
+        [SuppressMessage("SonarLint", "S1541", Justification = "Speeding things up")]
+        static Type ResolveSignature(MethodInfo method, int argumentCounter)
         {
             var hasReturnType = method.ReturnType != _voidType;
 
@@ -531,25 +527,13 @@ namespace Horizon
 
 	static class InvokeHelper<T>
     {
-        public static Lazy<Func<T, object>> CreateGetterLazy(PropertyInfo info)
-        {
-            return new Lazy<Func<T, object>>(() => CreateGetter(info));
-        }
+        public static Lazy<Func<T, object>> CreateGetterLazy(PropertyInfo info) => new Lazy<Func<T, object>>(() => CreateGetter(info));
 
-        public static Lazy<Func<T, object>> CreateGetterLazy(FieldInfo info)
-        {
-            return new Lazy<Func<T, object>>(() => CreateGetter(info));
-        }
+        public static Lazy<Func<T, object>> CreateGetterLazy(FieldInfo info) => new Lazy<Func<T, object>>(() => CreateGetter(info));
 
-        public static Lazy<Action<T, object>> CreateSetterLazy(PropertyInfo info)
-        {
-            return new Lazy<Action<T, object>>(() => CreateSetter(info));
-        }
+        public static Lazy<Action<T, object>> CreateSetterLazy(PropertyInfo info) => new Lazy<Action<T, object>>(() => CreateSetter(info));
 
-        public static Lazy<Action<T, object>> CreateSetterLazy(FieldInfo info)
-        {
-            return new Lazy<Action<T, object>>(() => CreateSetter(info));
-        }
+        public static Lazy<Action<T, object>> CreateSetterLazy(FieldInfo info) => new Lazy<Action<T, object>>(() => CreateSetter(info));
 
 
         public static Func<T, object> CreateGetter(FieldInfo info)
@@ -599,7 +583,7 @@ namespace Horizon
         }
 
 
-        private static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression,
+        static Action<T, object> BuildSetter(ParameterExpression parameter, Expression memberExpression,
                                                      Type valueType)
         {
             var value = Expression.Parameter(typeof(object), "value");
@@ -611,10 +595,6 @@ namespace Horizon
             return lambda.Compile();
         }
 
-        private static bool IsStatic(PropertyInfo propertyInfo)
-        {
-            return ((propertyInfo.CanRead && propertyInfo.GetMethod.IsStatic) ||
-                    (propertyInfo.CanWrite && propertyInfo.SetMethod.IsStatic));
-        }
+        static bool IsStatic(PropertyInfo propertyInfo) => ((propertyInfo.CanRead && propertyInfo.GetMethod.IsStatic) || (propertyInfo.CanWrite && propertyInfo.SetMethod.IsStatic));
     }
 }

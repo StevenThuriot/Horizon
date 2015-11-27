@@ -6,33 +6,24 @@ namespace Horizon
 {
     class NullCaller : IMethodCaller
     {
-        public static IMethodCaller Instance = new NullCaller();
+        public static readonly IMethodCaller Instance = new NullCaller();
 
-        private NullCaller()
+        NullCaller()
         {
             ParameterTypes = new SimpleParameterInfo[0];
         }
 
 
-        public string Name { get { return "null"; } }
+        public string Name => "null";
 
-        public object Call(IEnumerable<dynamic> values)
-        {
-            return null;
-        }
+        public object Call(IEnumerable<dynamic> values) => null;
 
-        public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; private set; }
+        public IReadOnlyList<SimpleParameterInfo> ParameterTypes { get; }
 
-        public bool IsStatic { get { return false; }}
+        public bool IsStatic => false;
 
-        public Type ReturnType
-        {
-            get { return typeof(object); }
-        }
+        public Type ReturnType => typeof(object);
 
-        public MethodInfo MethodInfo
-        {
-            get { return null; }
-        }
+        public MethodInfo MethodInfo => null;
     }
 }

@@ -7,14 +7,15 @@ namespace Horizon
 {
     class GenericMethodCaller : MethodCaller
     {
-        private readonly Dictionary<TypeHash, Delegate> _cache = new Dictionary<TypeHash, Delegate>();
+        readonly Dictionary<TypeHash, Delegate> _cache = new Dictionary<TypeHash, Delegate>();
 
         internal GenericMethodCaller(MethodInfo info)
             : base(info.GetGenericMethodDefinition(), GetParameters(info))
         {
         }
 
-        private static IEnumerable<SimpleParameterInfo> GetParameters(MethodInfo info)
+
+        static IEnumerable<SimpleParameterInfo> GetParameters(MethodInfo info)
         {
             foreach (var parameterInfo in info.GetParameters())
             {
@@ -29,7 +30,7 @@ namespace Horizon
                 if (!type.IsGenericParameter && type.ContainsGenericParameters)
                     genericTypeDefinition = type.GetGenericTypeDefinition();
 
-                yield return new SimpleParameterInfo(name, defaultValue, genericTypeDefinition, type, hasDefaultValue); ;
+                yield return new SimpleParameterInfo(name, defaultValue, genericTypeDefinition, type, hasDefaultValue);
             }
         }
 

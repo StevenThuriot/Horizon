@@ -6,19 +6,20 @@ namespace Horizon
     class MemberCaller<T> : IMemberCaller<T>
     {
         protected readonly MemberInfo _info;
-        private readonly Lazy<Action<T, object>> _setter;
-        private readonly Lazy<Func<T, object>> _getter;
+        readonly Lazy<Action<T, object>> _setter;
+        readonly Lazy<Func<T, object>> _getter;
 
         public readonly bool CanWrite;
         public readonly bool CanRead;
 
-        public MemberInfo MemberInfo { get { return _info; } }
-        public string Name { get; private set; }
-        public Type MemberType { get; private set; }
-        public bool IsProperty { get; private set; }
-        public bool IsField { get { return !IsProperty; } }
+        public MemberInfo MemberInfo => _info;
+        public string Name { get; }
+        public Type MemberType { get; }
+        public bool IsProperty { get; }
+        public bool IsField => !IsProperty;
 
-        private MemberCaller(MemberInfo info)
+
+        MemberCaller(MemberInfo info)
         {
             _info = info;
             Name = info.Name;
@@ -73,15 +74,9 @@ namespace Horizon
 
 
 
-        public object Get(T instance)
-        {
-            return _getter.Value(instance);
-        }
+        public object Get(T instance) => _getter.Value(instance);
 
-        public void Set(T instance, object value)
-        {
-            _setter.Value(instance, value);
-        }
+        public void Set(T instance, object value) => _setter.Value(instance, value);
 
         public bool TryGet(T instance, out object result)
         {
@@ -109,24 +104,12 @@ namespace Horizon
 
 
 
-        object IMemberCaller.Get(object instance)
-        {
-            return Get((T) instance);
-        }
+        object IMemberCaller.Get(object instance) => Get((T)instance);
 
-        void IMemberCaller.Set(object instance, object value)
-        {
-            Set((T)instance, value);
-        }
+        void IMemberCaller.Set(object instance, object value) => Set((T)instance, value);
 
-        bool IMemberCaller.TryGet(object instance, out object result)
-        {
-            return TryGet((T) instance, out result);
-        }
+        bool IMemberCaller.TryGet(object instance, out object result) => TryGet((T)instance, out result);
 
-        bool IMemberCaller.TrySet(object instance, object value)
-        {
-            return TrySet((T)instance, value);
-        }
+        bool IMemberCaller.TrySet(object instance, object value) => TrySet((T)instance, value);
     }
 }

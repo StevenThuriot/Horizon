@@ -6,8 +6,8 @@ namespace Horizon
 {
     struct TypeHash
     {
-        private readonly Type[] _types;
-        private readonly Lazy<int> _hashCode;
+        readonly Type[] _types;
+        readonly Lazy<int> _hashCode;
 
 
         public TypeHash(IEnumerable<Type> types)
@@ -16,34 +16,16 @@ namespace Horizon
             _hashCode = new Lazy<int>(() => unchecked(typeArray.Aggregate(17, (current, element) => current*31 + element.GetHashCode())));
         }
 
-        public IReadOnlyList<Type> Types
-        {
-            get { return _types; }
-        }
+        public IReadOnlyList<Type> Types => _types;
 
-        public bool Equals(TypeHash other)
-        {
-            return _types.SequenceEqual(other._types);
-        }
+        public bool Equals(TypeHash other) => _types.SequenceEqual(other._types);
 
-        public override bool Equals(object obj)
-        {
-            return obj is TypeHash && Equals((TypeHash) obj);
-        }
+        public override bool Equals(object obj) => obj is TypeHash && Equals((TypeHash)obj);
 
-        public static bool operator ==(TypeHash left, TypeHash right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(TypeHash left, TypeHash right) => left.Equals(right);
 
-        public static bool operator !=(TypeHash left, TypeHash right)
-        {
-            return !left.Equals(right);
-        }
-        
-        public override int GetHashCode()
-        {
-            return _hashCode.Value;
-        }
+        public static bool operator !=(TypeHash left, TypeHash right) => !left.Equals(right);
+
+        public override int GetHashCode() => _hashCode.Value;
     }
 }

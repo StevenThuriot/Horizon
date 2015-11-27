@@ -44,39 +44,30 @@ namespace Horizon
             _isAsync = new Lazy<bool>(() => typeof(Task).IsAssignableFrom(info.ReturnType));
         }
 
-        public bool IsAsync
-        {
-            get { return _isAsync.Value; }
-        }
+        public bool IsAsync => _isAsync.Value;
 
-        public bool IsStatic
-        {
-            get { return _info.IsStatic; }
-        }
+        public bool IsStatic => _info.IsStatic;
 
-        public Type ReturnType
-        {
-            get { return _info.ReturnType; }
-        }
+        public Type ReturnType => _info.ReturnType;
 
-        public MethodInfo MethodInfo
-        {
-            get { return _info; }
-        }
+        public MethodInfo MethodInfo => _info;
 
 
         public override bool Equals(object obj)
         {
-            if (Reference.IsNull(obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (Reference.IsNull(obj))
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (obj.GetType() != GetType())
+                return false;
+
             return Equals((MethodCaller) obj);
         }
 
-        protected bool Equals(MethodCaller other)
-        {
-            return string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
-        }
+        protected bool Equals(MethodCaller other) => string.Equals(Name, other.Name) && Equals(ParameterTypes, other.ParameterTypes);
 
         public override int GetHashCode()
         {

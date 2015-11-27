@@ -25,21 +25,20 @@ namespace Horizon
 
 		public object Value { get; set; }
 
-		public bool HasName
-		{
-			get { return !string.IsNullOrWhiteSpace(Name); }
-		}
+        public bool HasName => !string.IsNullOrWhiteSpace(Name);
 
-		public bool IsAssignableTo(Type parameterType)
+        public bool IsAssignableTo(Type parameterType)
         {
             var actualType = Type;
-            if (actualType == null) return false;
+            if (actualType == null)
+                return false;
 
 		    if (parameterType.IsGenericTypeDefinition && actualType.IsGenericType)
 		        return actualType.IsGenericTypeOf(parameterType);
 
 
-		    if (parameterType.IsAssignableFrom(actualType)) return true;
+		    if (parameterType.IsAssignableFrom(actualType))
+                return true;
             
 			var converter = TypeDescriptor.GetConverter(actualType);
 			if (converter.CanConvertTo(parameterType))
@@ -50,7 +49,8 @@ namespace Horizon
 				return true;
 
 		    var value = Value;
-		    if (Reference.IsNull(value)) return false;
+		    if (Reference.IsNull(value))
+                return false;
             
 
 		    //Resolve T through DLR

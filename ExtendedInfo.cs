@@ -7,30 +7,15 @@ namespace Horizon
     {
         public static class Extended
         {
-            public static IEnumerable<IMethodCaller> Methods
-            {
-                get { return _methods.SelectMany(callers => callers); }
-            }
+            public static IEnumerable<IMethodCaller> Methods => _methods.SelectMany(callers => callers);
 
-            public static IEnumerable<IConstructorCaller> Constructors
-            {
-                get { return _constructors.AsReadOnly(); }
-            }
+            public static IEnumerable<IConstructorCaller> Constructors => _constructors.AsReadOnly();
 
-            public static IEnumerable<IEventCaller> Events
-            {
-                get { return _events.Values; }
-            }
+            public static IEnumerable<IEventCaller> Events => _events.Values;
 
-            public static IEnumerable<IPropertyCaller<T>> Properties
-            {
-                get { return _properties.Values; }
-            }
+            public static IEnumerable<IPropertyCaller<T>> Properties => _properties.Values;
 
-            public static IEnumerable<IMemberCaller<T>> Fields
-            {
-                get { return _fields.Values; }
-            }
+            public static IEnumerable<IMemberCaller<T>> Fields => _fields.Values;
 
             public static IEnumerable<IMemberCaller<T>> Members
             {

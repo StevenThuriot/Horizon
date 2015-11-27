@@ -76,40 +76,19 @@ namespace Horizon
             _events = events.ToDictionary(x => x.Name);
         }
 
-        public static object GetProperty(T instance, string property)
-        {
-            return _properties[property].Get(instance);
-        }
+        public static object GetProperty(T instance, string property) => _properties[property].Get(instance);
 
-        public static object GetField(T instance, string field)
-        {
-            return _fields[field].Get(instance);
-        }
+        public static object GetField(T instance, string field) => _fields[field].Get(instance);
 
-        public static void SetProperty(T instance, string property, object value)
-        {
-            _properties[property].Set(instance, value);
-        }
+        public static void SetProperty(T instance, string property, object value) => _properties[property].Set(instance, value);
 
-        public static void SetField(T instance, string field, object value)
-        {
-            _fields[field].Set(instance, value);
-        }
+        public static void SetField(T instance, string field, object value) => _fields[field].Set(instance, value);
 
-        public static void RaiseEvent(T instance, string @event, params dynamic[] arguments)
-        {
-            _events[@event].Raise(instance, arguments);
-        }
+        public static void RaiseEvent(T instance, string @event, params dynamic[] arguments) => _events[@event].Raise(instance, arguments);
         
-        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates)
-        {
-            _events[@event].Add(instance, delegates);
-        }
+        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => _events[@event].Add(instance, delegates); 
 
-        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates)
-        {
-            _events[@event].Remove(instance, delegates);
-        }
+        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => _events[@event].Remove(instance, delegates); 
 
 
 
@@ -286,12 +265,9 @@ namespace Horizon
             return CallerSelector.TryCall(args, methods, out result);
         }
 
-	    public static T Create(params object[] args)
-	    {
-		    return (T) CallerSelector.Create(_constructors, args);
-	    }
+        public static T Create(params object[] args) => (T)CallerSelector.Create(_constructors, args);
 
-	    public static bool TryCreate(out T instance, params object[] args)
+        public static bool TryCreate(out T instance, params object[] args)
 	    {
 		    object boxedInstance;
 		    if (CallerSelector.TryCreate(_constructors, args, out boxedInstance))
@@ -340,68 +316,33 @@ namespace Horizon
 
 
 
-	    public static bool HasField(string field)
-        {
-            return HasGetterField(field); //No need to check setter
-        }
+        public static bool HasField(string field) => HasGetterField(field); //No need to check setter
 
-        public static bool HasProperty(string property)
-        {
-            return HasGetterProperty(property) || HasSetterProperty(property);
-        }
+        public static bool HasProperty(string property) => HasGetterProperty(property) || HasSetterProperty(property);
 
-        public static bool HasGetterProperty(string property)
-        {
-            return _properties.ContainsKey(property);
-        }
+        public static bool HasGetterProperty(string property) => _properties.ContainsKey(property);
 
-        public static bool HasSetterProperty(string property)
-        {
-            return _properties.ContainsKey(property);
-        }
+        public static bool HasSetterProperty(string property) => _properties.ContainsKey(property);
 
-        public static bool HasGetterField(string field)
-        {
-            return _fields.ContainsKey(field);
-        }
+        public static bool HasGetterField(string field) => _fields.ContainsKey(field);
 
-        public static bool HasSetterField(string field)
-        {
-            return _fields.ContainsKey(field);
-        }
+        public static bool HasSetterField(string field) => _fields.ContainsKey(field);
 
-        public static bool HasMethod(string method)
-        {
-            return _methods.Contains(method);
-        }
-        
-        public static IEnumerable<IMethodCaller> GetMethod(string method)
-        {
-            return _methods[method];
-        }
+        public static bool HasMethod(string method) => _methods.Contains(method);
 
-        public static bool HasEvent(string @event)
-        {
-            return _events.ContainsKey(@event);
-        }
-        
-        public static IEventCaller GetEvent(string @event)
-        {
-            return _events[@event];
-        }
+        public static IEnumerable<IMethodCaller> GetMethod(string method) => _methods[method];
 
-        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments)
-        {
-            return ResolveSpecificCaller(_methods[method], arguments);
-        }
+        public static bool HasEvent(string @event) => _events.ContainsKey(@event);
 
-        public static IConstructorCaller GetConstructor(params Type[] arguments)
-        {
-            return ResolveSpecificCaller(_constructors, arguments);
-        }
+        public static IEventCaller GetEvent(string @event) => _events[@event];
+
+        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments) => ResolveSpecificCaller(_methods[method], arguments);
+
+        public static IConstructorCaller GetConstructor(params Type[] arguments) => ResolveSpecificCaller(_constructors, arguments);
+
 
         //Simple specific version of the caller selector which enforces types and argument count.
-        private static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments)
+        static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments)
             where TCaller : ICaller
         {
             foreach (var caller in callers.Where(x => x.ParameterTypes.Count == arguments.Count))
@@ -467,7 +408,7 @@ namespace Horizon
             return true;
         }
 
-        private static MethodCaller Findop_Implicit(Type type)
+        static MethodCaller Findop_Implicit(Type type)
         {
             var methods = _methods["op_Implicit"];
             var owner = typeof(T);

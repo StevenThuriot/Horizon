@@ -5,7 +5,7 @@ namespace Horizon
 {
     class SelectableArgument : Argument
     {
-        private Type _actualType;
+        Type _actualType;
 
         public SelectableArgument(SimpleParameterInfo parameterInfo)
             : base(parameterInfo.Name, parameterInfo.DefaultValue, parameterInfo.ParameterType)
@@ -28,8 +28,9 @@ namespace Horizon
         {
             var outType = Type;
 
-            if (outType == null) return false;
-
+            if (outType == null)
+                return false;
+            
             var actualType = _actualType;
 
             if (outType.IsGenericTypeDefinition)
@@ -42,7 +43,8 @@ namespace Horizon
             }
 
             var value = Value;
-            if (outType.IsAssignableFrom(actualType)) return value;
+            if (outType.IsAssignableFrom(actualType))
+                return value;
 
             if (Reference.IsNull(value))
                 return null;

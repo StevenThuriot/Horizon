@@ -8,16 +8,10 @@ namespace Horizon
         {
         }
 
-        public MethodInfo GetSetMethod()
-        {
-            return PropertyInfo.GetSetMethod();
-        }
+        public MethodInfo GetSetMethod() => PropertyInfo.GetSetMethod();
 
-        public MethodInfo GetGetMethod()
-        {
-            return PropertyInfo.GetGetMethod();
-        }
+        public MethodInfo GetGetMethod() => PropertyInfo.GetGetMethod();
 
-        public PropertyInfo PropertyInfo { get { return (PropertyInfo) _info; } }
+        public PropertyInfo PropertyInfo => (PropertyInfo)_info;
     }
 }
