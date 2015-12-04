@@ -217,29 +217,10 @@ namespace Horizon
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
-        public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args)
-        {
-            var methods = _methods[binder.Name];
-            return CallerSelector.Call(instance, binder, args, methods);
-        }
-
-        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args)
-        {
-            var methods = _methods[binder.Name];
-            return CallerSelector.Call(binder, args, methods);
-        }
-
-        public static bool TryCall(T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result)
-        {
-            var methods = _methods[binder.Name];
-            return CallerSelector.TryCall(instance, binder, args, methods, out result);
-        }
-
-        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, out object result)
-        {
-            var methods = _methods[binder.Name];
-            return CallerSelector.TryCall(binder, args, methods, out result);
-        }
+        public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args) => Call(instance, binder.Name, args);
+        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args) => Call(binder.Name, args);
+        public static bool TryCall(T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result) => TryCall(instance, binder.Name, args, out result);
+        public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, out object result) => TryCall(binder.Name, args, out result);
 
         public static object Call(T instance, string methodName, IEnumerable<object> args)
         {
