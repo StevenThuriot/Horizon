@@ -8,9 +8,6 @@ namespace Horizon
 {
     static partial class Info<T>
     {
-        const string Indexer_Getter = "get_Item";
-        const string Indexer_Setter = "set_Item";
-
 #pragma warning disable S2743 // Static fields should not be used in generic types
 
         static readonly ILookup<string, MethodCaller> _methods;
@@ -47,10 +44,9 @@ namespace Horizon
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
                     var methodInfo = (MethodInfo) member;
-                    if (!methodInfo.IsSpecialName || methodInfo.Name == Indexer_Getter || methodInfo.Name == Indexer_Setter)
+                    if (!methodInfo.IsSpecialName)
                     {
                         //Skip Properties, events, ... 
-                        //Keep indexer. It's considered a specialname (property), but can have overloads thus we want to use the CallerSelector.
                         var caller = MethodCaller.Create(methodInfo);
                         methods.Add(caller);
                     }
@@ -177,13 +173,19 @@ namespace Horizon
 
         public static object GetIndexer(T instance, object[] indexes)
         {
-            var methods = _methods[Indexer_Getter];
+            var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
+                                            .Select(x => x.GetGetCaller())
+                                            .ToArray();
+
             return CallerSelector.GetIndexer(instance, methods, indexes);
         }
 
         public static bool TryGetIndexer(T instance, object[] indexes, out object result)
         {
-            var methods = _methods[Indexer_Getter];
+            var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
+                                            .Select(x => x.GetGetCaller())
+                                            .ToArray();
+
             return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
         }
 
@@ -207,13 +209,19 @@ namespace Horizon
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _methods[Indexer_Setter];
+            var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
+                                            .Select(x => x.GetSetCaller())
+                                            .ToArray();
+
             CallerSelector.SetIndexer(instance, methods, indexes, value);
         }
 
         public static bool TrySetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _methods[Indexer_Setter];
+            var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
+                                            .Select(x => x.GetSetCaller())
+                                            .ToArray();
+
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
