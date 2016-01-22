@@ -51,6 +51,18 @@ namespace Horizon
 
         public static bool TryImplicitConvert<T>(this T instance, Type type, out dynamic result) => Info<T>.TryImplicitConvert(instance, type, out result);
 
+        public static bool HasField<T>(this T instance, string field) => Info<T>.HasField(field);
+
+        public static bool HasProperty<T>(this T instance, string property) => Info<T>.HasProperty(property);
+
+        public static bool HasGetterProperty<T>(this T instance, string property) => Info<T>.HasGetterProperty(property);
+
+        public static bool HasSetterProperty<T>(this T instance, string property) => Info<T>.HasSetterProperty(property);
+
+        public static bool HasGetterField<T>(this T instance, string field) => Info<T>.HasGetterField(field);
+
+        public static bool HasSetterField<T>(this T instance, string field) => Info<T>.HasSetterField(field);
+
         public static bool HasMethod<T>(this T instance, string method) => Info<T>.HasMethod(method);
 
         public static IEnumerable<IMethodCaller> GetMethod<T>(this T instance, string method) => Info<T>.GetMethod(method);
