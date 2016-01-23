@@ -7,21 +7,37 @@ namespace Horizon
     {
         public PropertyCaller(PropertyInfo info) : base(info)
         {
-            Indexer = info.GetCustomAttribute<IndexerNameAttribute>() != null;
+            Indexer = info.GetIndexParameters().Length != 0;  //info.GetCustomAttribute<IndexerNameAttribute>() != null;
         }
 
         public MethodInfo GetSetMethod() => PropertyInfo.GetSetMethod();
 
         public MethodInfo GetGetMethod() => PropertyInfo.GetGetMethod();
-        
+
         public PropertyInfo PropertyInfo => (PropertyInfo)_info;
 
         public bool Indexer { get; }
 
         //TODO : Cache
-        public MethodCaller GetSetCaller() => new MethodCaller(PropertyInfo.GetSetMethod());
+        public MethodCaller GetSetCaller()
+        {
+            var method = GetSetMethod();
 
-        public MethodCaller GetGetCaller() => new MethodCaller(PropertyInfo.GetGetMethod());
+            if (method == null)
+                return null;
+
+            return new MethodCaller(method);
+        }
+
+        public MethodCaller GetGetCaller()
+        {
+            var method = GetGetMethod();
+
+            if (method == null)
+                return null;
+
+            return new MethodCaller(method);
+        }
 
     }
 }

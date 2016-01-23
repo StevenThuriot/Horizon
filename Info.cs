@@ -175,6 +175,7 @@ namespace Horizon
         {
             var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
                                             .Select(x => x.GetGetCaller())
+                                            .Where(x => x != null)
                                             .ToArray();
 
             return CallerSelector.GetIndexer(instance, methods, indexes);
@@ -184,6 +185,7 @@ namespace Horizon
         {
             var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
                                             .Select(x => x.GetGetCaller())
+                                            .Where(x => x != null)
                                             .ToArray();
 
             return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
@@ -211,6 +213,7 @@ namespace Horizon
         {
             var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
                                             .Select(x => x.GetSetCaller())
+                                            .Where(x => x != null)
                                             .ToArray();
 
             CallerSelector.SetIndexer(instance, methods, indexes, value);
@@ -220,6 +223,7 @@ namespace Horizon
         {
             var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
                                             .Select(x => x.GetSetCaller())
+                                            .Where(x => x != null)
                                             .ToArray();
 
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
