@@ -2,8 +2,7 @@
 
 A .NET Fast Very Late Binding invoker
 
-![Beyond the horizon
-by agnidevi](https://cloud.githubusercontent.com/assets/544444/12533192/19b405d8-c228-11e5-9a12-2f6720e09e7e.jpg)
+![Beyond the horizon by agnidevi](https://cloud.githubusercontent.com/assets/544444/12533192/19b405d8-c228-11e5-9a12-2f6720e09e7e.jpg)
 
 #### Basically…
 
