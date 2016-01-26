@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
@@ -72,13 +73,40 @@ namespace Horizon
                 if (cache.TryGetValue(type, out enumerator))
                     return enumerator();
 
-                var info = typeof (Info<>.Extended).MakeGenericType(type);
+                var info = typeof(Info<>.Extended).MakeGenericType(type);
                 var property = Expression.Property(null, info, propertyName);
                 var lambda = Expression.Lambda<Func<TResult>>(property);
 
                 cache[type] = enumerator = lambda.Compile();
 
                 return enumerator();
+            }
+            
+            //Simple specific version of the caller selector which enforces types and argument count.
+            internal static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments)
+                where TCaller : ICaller
+            {
+                foreach (var caller in callers.Where(x => x.ParameterTypes.Count == arguments.Count))
+                {
+                    var parameterTypes = caller.ParameterTypes;
+
+                    var match = true;
+                    for (var i = 0; i < arguments.Count; i++)
+                    {
+                        var argument = arguments[i];
+                        var simpleParameterInfo = parameterTypes[i];
+                        if (simpleParameterInfo.ParameterType == argument)
+                            continue;
+
+                        match = false;
+                        break;
+                    }
+
+                    if (match)
+                        return caller;
+                }
+
+                throw new ArgumentException("No matching caller found.");
             }
         }
     }
