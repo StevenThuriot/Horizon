@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Horizon
@@ -10,6 +11,8 @@ namespace Horizon
             public static IEnumerable<IMethodCaller> Methods => _methods.SelectMany(callers => callers);
 
             public static IEnumerable<IConstructorCaller> Constructors => _constructors.AsReadOnly();
+
+            public static IConstructorCaller DefaultConstructor => Info.Extended.ResolveSpecificCaller(_constructors, Type.EmptyTypes);
 
             public static IEnumerable<IEventCaller> Events => _events.Values;
 

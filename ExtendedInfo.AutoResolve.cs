@@ -14,6 +14,8 @@ namespace Horizon
 
             public static IEnumerable<IConstructorCaller> Constructors<T>(T instance) => Info<T>.Extended.Constructors;
 
+            public static IConstructorCaller DefaultConstructor<T>(T instance) => Info<T>.Extended.DefaultConstructor;
+
             public static IEnumerable<IEventCaller> Events<T>(T instance) => Info<T>.Extended.Events;
 
 
@@ -39,6 +41,8 @@ namespace Horizon
             public static IEnumerable<IMethodCaller> Methods(Type type) => ResolveCallForType(type, _methodCache);
 
             public static IEnumerable<IConstructorCaller> Constructors(Type type) => ResolveCallForType(type, _ctorCache);
+
+            public static IConstructorCaller DefaultConstructor(Type type) => ResolveSpecificCaller(Constructors(type), Type.EmptyTypes);
 
             public static IEnumerable<IEventCaller> Events(Type type) => ResolveCallForType(type, _eventCache);
 
