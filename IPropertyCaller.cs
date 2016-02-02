@@ -7,7 +7,7 @@ namespace Horizon
         MethodInfo GetSetMethod();
         MethodInfo GetGetMethod();
         PropertyInfo PropertyInfo { get; }
-        bool Indexer { get; }
+        bool IsIndexer { get; }
     }
 
     partial interface IPropertyCaller<in T> : IMemberCaller<T>, IPropertyCaller

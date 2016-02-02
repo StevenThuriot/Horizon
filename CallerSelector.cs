@@ -50,21 +50,21 @@ namespace Horizon
 
         static readonly Stack<string> EmptyStack = new Stack<string>();
 
-        public static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
 
-			var arguments = args.ToList();
+			var arguments = args.ToArray();
 			return SelectMethod(callers, arguments, EmptyStack);
 		}
 
-        public static Tuple<ICaller, List<dynamic>> SelectMethod(CallInfo callInfo, IEnumerable<ICaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(CallInfo callInfo, IEnumerable<ICaller> callers, IEnumerable<object> args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
 
-			var arguments = args.ToList();
+			var arguments = args.ToArray();
 
 			//Build argument list from binder
 			var names = new Stack<string>(callInfo.ArgumentNames);
@@ -72,7 +72,7 @@ namespace Horizon
 			return SelectMethod(callers, arguments, names);
 		}
 
-        static Tuple<ICaller, List<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
+        static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IReadOnlyList<object> arguments, Stack<string> names)
 		{
 			var list = new List<Argument>();
 			//Named parameters can always be mapped directly on the last parameters.
@@ -98,7 +98,8 @@ namespace Horizon
 			if (selectedCaller == null)
 				return null;
 
-			return Tuple.Create(selectedCaller, actualArguments.Select(x => x.GetValue()).ToList());
+            var argumentsResult = (IReadOnlyList<dynamic>)actualArguments.Select(x => x.GetValue()).ToArray();
+            return Tuple.Create(selectedCaller, argumentsResult);
 		}
 
 

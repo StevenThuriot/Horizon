@@ -17,6 +17,8 @@ namespace Horizon
         static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
 
         static readonly Dictionary<string, PropertyCaller<T>> _properties = new Dictionary<string, PropertyCaller<T>>();
+        static readonly List<PropertyCaller<T>> _indexers = new List<PropertyCaller<T>>();
+
         static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
 
 #pragma warning restore S2743 // Static fields should not be used in generic types
@@ -34,7 +36,11 @@ namespace Horizon
                 if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
                 {
                     var propertyInfo = (PropertyInfo) member;
-                    _properties[key] = new PropertyCaller<T>(propertyInfo);
+                    var propertyCaller = new PropertyCaller<T>(propertyInfo);
+                    _properties[key] = propertyCaller;
+
+                    if (propertyCaller.IsIndexer)
+                        _indexers.Add(propertyCaller);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
@@ -65,10 +71,10 @@ namespace Horizon
                     events.Add(caller);
                 }
 			}
-            
+
             _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
                               .ToLookup(x => x.Name, x => x);
-
+            
             _events = events.ToDictionary(x => x.Name);
         }
 
@@ -173,20 +179,19 @@ namespace Horizon
 
         public static object GetIndexer(T instance, object[] indexes)
         {
-            var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
-                                            .Select(x => x.GetGetCaller())
-                                            .Where(x => x != null)
-                                            .ToArray();
+            var methods = _indexers.Where(x => x.CanRead)
+                                   .Select(x => x.GetGetCaller())
+                                   .ToArray();
 
             return CallerSelector.GetIndexer(instance, methods, indexes);
         }
 
         public static bool TryGetIndexer(T instance, object[] indexes, out object result)
         {
-            var methods = _properties.Values.Where(x => x.CanRead && x.Indexer)
-                                            .Select(x => x.GetGetCaller())
-                                            .Where(x => x != null)
-                                            .ToArray();
+            var methods = _indexers.Where(x => x.CanRead)
+                                   .Select(x => x.GetGetCaller())
+                                   .Where(x => x != null)
+                                   .ToArray();
 
             return CallerSelector.TryGetIndexer(instance, methods, indexes, out result);
         }
@@ -211,20 +216,20 @@ namespace Horizon
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
-                                            .Select(x => x.GetSetCaller())
-                                            .Where(x => x != null)
-                                            .ToArray();
+            var methods = _indexers.Where(x => x.CanWrite)
+                                   .Select(x => x.GetSetCaller())
+                                   .Where(x => x != null)
+                                   .ToArray();
 
             CallerSelector.SetIndexer(instance, methods, indexes, value);
         }
 
         public static bool TrySetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _properties.Values.Where(x => x.CanWrite && x.Indexer)
-                                            .Select(x => x.GetSetCaller())
-                                            .Where(x => x != null)
-                                            .ToArray();
+            var methods = _indexers.Where(x => x.CanWrite)
+                                   .Select(x => x.GetSetCaller())
+                                   .Where(x => x != null)
+                                   .ToArray();
 
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
