@@ -1,4 +1,4 @@
-# Horizon
+# ![Horizon](https://cloud.githubusercontent.com/assets/544444/12792271/5a2c4680-caab-11e5-927d-6a2646454c14.png)
 
 A .NET Fast Very Late Binding invoker
 
