@@ -87,7 +87,7 @@ namespace Horizon
             }
             
             //Simple specific version of the caller selector which enforces types and argument count.
-            internal static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments)
+            internal static TCaller ResolveSpecificCaller<TCaller>(IEnumerable<TCaller> callers, IReadOnlyList<Type> arguments, bool throwWhenNotfound = true)
                 where TCaller : ICaller
             {
                 foreach (var caller in callers.Where(x => x.ParameterTypes.Count == arguments.Count))
@@ -110,7 +110,10 @@ namespace Horizon
                         return caller;
                 }
 
-                throw new ArgumentException("No matching caller found.");
+                if (throwWhenNotfound)
+                    throw new ArgumentException("No matching caller found.");
+
+                return default(TCaller);
             }
         }
     }
