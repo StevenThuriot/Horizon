@@ -2,107 +2,9 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Reflection;
 
 namespace Horizon
 {
-    interface IInfoContainer
-    {
-        ILookup<string, MethodCaller> Methods { get; }
-
-        IReadOnlyList<ConstructorCaller> Constructors { get; }
-
-        IReadOnlyDictionary<string, EventCaller> Events { get; }
-
-        IReadOnlyDictionary<string, IPropertyCaller> Properties { get; }
-        IReadOnlyList<IPropertyCaller> Indexers { get; }
-
-        IReadOnlyDictionary<string, IMemberCaller> Fields { get; }
-    }
-
-    class InfoContainer<T> 
-    {
-        public readonly ILookup<string, MethodCaller> Methods;
-        
-        public readonly IReadOnlyList<ConstructorCaller> Constructors;
-        
-        public readonly IReadOnlyDictionary<string, EventCaller> Events;
-        
-        public readonly IReadOnlyDictionary<string, PropertyCaller<T>> Properties;
-        public readonly IReadOnlyList<PropertyCaller<T>> Indexers;
-        
-        public readonly IReadOnlyDictionary<string, MemberCaller<T>> Fields;
-
-        public InfoContainer()
-        {
-            var ctors = new List<ConstructorCaller>();
-            Constructors = ctors;
-
-            var methods = new List<MethodCaller>();
-
-            var events = new List<EventCaller>();
-
-            var props = new Dictionary<string, PropertyCaller<T>>();
-            Properties = props;
-
-            var fields = new Dictionary<string, MemberCaller<T>>();
-            Fields = fields;
-
-            var indexers = new List<PropertyCaller<T>>();
-            Indexers = indexers;
-
-            foreach (var member in typeof(T).GetMembers(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static //default getMember flags
-                                                                                | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)) //Our additional flags
-            {
-                var key = member.Name;
-
-                if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
-                {
-                    var propertyInfo = (PropertyInfo)member;
-                    var propertyCaller = new PropertyCaller<T>(propertyInfo);
-                    props[key] = propertyCaller;
-
-                    if (propertyCaller.IsIndexer)
-                        indexers.Add(propertyCaller);
-                }
-                else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
-                {
-                    var fieldInfo = (FieldInfo)member;
-                    fields[key] = new MemberCaller<T>(fieldInfo);
-                }
-                else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
-                {
-                    var methodInfo = (MethodInfo)member;
-                    if (!methodInfo.IsSpecialName)
-                    {
-                        //Skip Properties, events, ... 
-                        var caller = MethodCaller.Create(methodInfo);
-                        methods.Add(caller);
-                    }
-                }
-                else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
-                {
-                    var constructorInfo = (ConstructorInfo)member;
-                    var caller = new ConstructorCaller(constructorInfo);
-                    ctors.Add(caller);
-                }
-                else if ((MemberTypes.Event & member.MemberType) == MemberTypes.Event)
-                {
-                    var eventInfo = (EventInfo)member;
-                    var caller = new EventCaller(eventInfo);
-
-                    events.Add(caller);
-                }
-            }
-
-            Methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
-                              .ToLookup(x => x.Name, x => x);
-
-            Events = events.ToDictionary(x => x.Name);
-        }
-    }
-
-    
     static partial class Info<T>
     {
         static InfoContainer<T> container = new InfoContainer<T>();
@@ -120,9 +22,7 @@ namespace Horizon
         public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Add(instance, delegates); 
 
         public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Remove(instance, delegates); 
-
-
-
+        
         public static object GetValue(T instance, string propertyOrField)
         {
             PropertyCaller<T> getter;
