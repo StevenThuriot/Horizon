@@ -6,27 +6,50 @@ using System.Reflection;
 
 namespace Horizon
 {
-    static partial class Info<T>
+    interface IInfoContainer
     {
-#pragma warning disable S2743 // Static fields should not be used in generic types
+        ILookup<string, MethodCaller> Methods { get; }
 
-        static readonly ILookup<string, MethodCaller> _methods;
+        IReadOnlyList<ConstructorCaller> Constructors { get; }
 
-        static readonly List<ConstructorCaller> _constructors = new List<ConstructorCaller>();
+        IReadOnlyDictionary<string, EventCaller> Events { get; }
+
+        IReadOnlyDictionary<string, IPropertyCaller> Properties { get; }
+        IReadOnlyList<IPropertyCaller> Indexers { get; }
+
+        IReadOnlyDictionary<string, IMemberCaller> Fields { get; }
+    }
+
+    class InfoContainer<T> 
+    {
+        public readonly ILookup<string, MethodCaller> Methods;
         
-        static readonly Dictionary<string, EventCaller> _events = new Dictionary<string, EventCaller>();
+        public readonly IReadOnlyList<ConstructorCaller> Constructors;
+        
+        public readonly IReadOnlyDictionary<string, EventCaller> Events;
+        
+        public readonly IReadOnlyDictionary<string, PropertyCaller<T>> Properties;
+        public readonly IReadOnlyList<PropertyCaller<T>> Indexers;
+        
+        public readonly IReadOnlyDictionary<string, MemberCaller<T>> Fields;
 
-        static readonly Dictionary<string, PropertyCaller<T>> _properties = new Dictionary<string, PropertyCaller<T>>();
-        static readonly List<PropertyCaller<T>> _indexers = new List<PropertyCaller<T>>();
-
-        static readonly Dictionary<string, MemberCaller<T>> _fields = new Dictionary<string, MemberCaller<T>>();
-
-#pragma warning restore S2743 // Static fields should not be used in generic types
-
-        static Info()
+        public InfoContainer()
         {
+            var ctors = new List<ConstructorCaller>();
+            Constructors = ctors;
+
             var methods = new List<MethodCaller>();
+
             var events = new List<EventCaller>();
+
+            var props = new Dictionary<string, PropertyCaller<T>>();
+            Properties = props;
+
+            var fields = new Dictionary<string, MemberCaller<T>>();
+            Fields = fields;
+
+            var indexers = new List<PropertyCaller<T>>();
+            Indexers = indexers;
 
             foreach (var member in typeof(T).GetMembers(BindingFlags.Default | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static //default getMember flags
                                                                                 | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)) //Our additional flags
@@ -35,21 +58,21 @@ namespace Horizon
 
                 if ((MemberTypes.Property & member.MemberType) == MemberTypes.Property)
                 {
-                    var propertyInfo = (PropertyInfo) member;
+                    var propertyInfo = (PropertyInfo)member;
                     var propertyCaller = new PropertyCaller<T>(propertyInfo);
-                    _properties[key] = propertyCaller;
+                    props[key] = propertyCaller;
 
                     if (propertyCaller.IsIndexer)
-                        _indexers.Add(propertyCaller);
+                        indexers.Add(propertyCaller);
                 }
                 else if ((MemberTypes.Field & member.MemberType) == MemberTypes.Field)
                 {
                     var fieldInfo = (FieldInfo)member;
-                    _fields[key] = new MemberCaller<T>(fieldInfo);
+                    fields[key] = new MemberCaller<T>(fieldInfo);
                 }
                 else if ((MemberTypes.Method & member.MemberType) == MemberTypes.Method)
                 {
-                    var methodInfo = (MethodInfo) member;
+                    var methodInfo = (MethodInfo)member;
                     if (!methodInfo.IsSpecialName)
                     {
                         //Skip Properties, events, ... 
@@ -57,61 +80,67 @@ namespace Horizon
                         methods.Add(caller);
                     }
                 }
-				else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
-				{
-					var constructorInfo = (ConstructorInfo)member;
+                else if ((MemberTypes.Constructor & member.MemberType) == MemberTypes.Constructor)
+                {
+                    var constructorInfo = (ConstructorInfo)member;
                     var caller = new ConstructorCaller(constructorInfo);
-					_constructors.Add(caller);
-				}
+                    ctors.Add(caller);
+                }
                 else if ((MemberTypes.Event & member.MemberType) == MemberTypes.Event)
                 {
-                    var eventInfo = (EventInfo) member;
+                    var eventInfo = (EventInfo)member;
                     var caller = new EventCaller(eventInfo);
 
                     events.Add(caller);
                 }
-			}
+            }
 
-            _methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
+            Methods = methods.OrderBy(x => x is GenericMethodCaller)//this will make sure non-generic caller are prefered.
                               .ToLookup(x => x.Name, x => x);
-            
-            _events = events.ToDictionary(x => x.Name);
+
+            Events = events.ToDictionary(x => x.Name);
         }
+    }
 
-        public static object GetProperty(T instance, string property) => _properties[property].Get(instance);
+    
+    static partial class Info<T>
+    {
+        static InfoContainer<T> container = new InfoContainer<T>();
 
-        public static object GetField(T instance, string field) => _fields[field].Get(instance);
+        public static object GetProperty(T instance, string property) => container.Properties[property].Get(instance);
 
-        public static void SetProperty(T instance, string property, object value) => _properties[property].Set(instance, value);
+        public static object GetField(T instance, string field) => container.Fields[field].Get(instance);
 
-        public static void SetField(T instance, string field, object value) => _fields[field].Set(instance, value);
+        public static void SetProperty(T instance, string property, object value) => container.Properties[property].Set(instance, value);
 
-        public static void RaiseEvent(T instance, string @event, params dynamic[] arguments) => _events[@event].Raise(instance, arguments);
+        public static void SetField(T instance, string field, object value) => container.Fields[field].Set(instance, value);
+
+        public static void RaiseEvent(T instance, string @event, params dynamic[] arguments) => container.Events[@event].Raise(instance, arguments);
         
-        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => _events[@event].Add(instance, delegates); 
+        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Add(instance, delegates); 
 
-        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => _events[@event].Remove(instance, delegates); 
+        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Remove(instance, delegates); 
 
 
 
         public static object GetValue(T instance, string propertyOrField)
         {
             PropertyCaller<T> getter;
-            if (_properties.TryGetValue(propertyOrField, out getter))
+            if (container.Properties.TryGetValue(propertyOrField, out getter))
                 return getter.Get(instance);
 
-            return _fields[propertyOrField].Get(instance);
+            return container.Fields[propertyOrField].Get(instance);
         }
 
 
         public static bool TryGetValue(T instance, string propertyOrField, out object result)
         {
             PropertyCaller<T> prop;
-            if (_properties.TryGetValue(propertyOrField, out prop))
+            if (container.Properties.TryGetValue(propertyOrField, out prop))
                 return prop.TryGet(instance, out result);
 
             MemberCaller<T> field;
-            if (_fields.TryGetValue(propertyOrField, out field))
+            if (container.Fields.TryGetValue(propertyOrField, out field))
                 return field.TryGet(instance, out result);
 
             result = null;
@@ -122,13 +151,13 @@ namespace Horizon
         public static void SetValue(T instance, string propertyOrField, object value)
         {
             PropertyCaller<T> prop;
-            if (_properties.TryGetValue(propertyOrField, out prop))
+            if (container.Properties.TryGetValue(propertyOrField, out prop))
             {
                 prop.Set(instance, value);
             }
             else
             {
-                _fields[propertyOrField].Set(instance, value);
+                container.Fields[propertyOrField].Set(instance, value);
             }
         }
 
@@ -136,11 +165,11 @@ namespace Horizon
         public static bool TrySetValue(T instance, string propertyOrField, object value)
         {
             PropertyCaller<T> prop;
-            if (_properties.TryGetValue(propertyOrField, out prop))
+            if (container.Properties.TryGetValue(propertyOrField, out prop))
                 return prop.TrySet(instance, value);
 
             MemberCaller<T> field;
-            if (_fields.TryGetValue(propertyOrField, out field))
+            if (container.Fields.TryGetValue(propertyOrField, out field))
                 return field.TrySet(instance, value);
 
             return false;
@@ -157,7 +186,7 @@ namespace Horizon
         public static bool TryGetProperty(T instance, string property, out object result)
         {
             PropertyCaller<T> getter;
-            if (_properties.TryGetValue(property, out getter))
+            if (container.Properties.TryGetValue(property, out getter))
                 return getter.TryGet(instance, out result);
 
             result = null;
@@ -167,7 +196,7 @@ namespace Horizon
         public static bool TryGetField(T instance, string field, out object result)
         {
             MemberCaller<T> getter;
-            if (_fields.TryGetValue(field, out getter))
+            if (container.Fields.TryGetValue(field, out getter))
                 return getter.TryGet(instance, out result);
 
             result = null;
@@ -179,7 +208,7 @@ namespace Horizon
 
         public static object GetIndexer(T instance, object[] indexes)
         {
-            var methods = _indexers.Where(x => x.CanRead)
+            var methods = container.Indexers.Where(x => x.CanRead)
                                    .Select(x => x.GetGetCaller())
                                    .ToArray();
 
@@ -188,7 +217,7 @@ namespace Horizon
 
         public static bool TryGetIndexer(T instance, object[] indexes, out object result)
         {
-            var methods = _indexers.Where(x => x.CanRead)
+            var methods = container.Indexers.Where(x => x.CanRead)
                                    .Select(x => x.GetGetCaller())
                                    .Where(x => x != null)
                                    .ToArray();
@@ -199,7 +228,7 @@ namespace Horizon
         public static bool TrySetProperty(T instance, string property, object value)
         {
             PropertyCaller<T> setter;
-            return _properties.TryGetValue(property, out setter) && setter.TrySet(instance, value);
+            return container.Properties.TryGetValue(property, out setter) && setter.TrySet(instance, value);
         }
 
         public static void SetProperty(T instance, SetMemberBinder binder, object value) => SetProperty(instance, binder.Name, value);
@@ -208,7 +237,7 @@ namespace Horizon
         public static bool TrySetField(T instance, string field, object value)
         {
             MemberCaller<T> setter;
-            return _fields.TryGetValue(field, out setter) && setter.TrySet(instance, value);
+            return container.Fields.TryGetValue(field, out setter) && setter.TrySet(instance, value);
         }
 
         public static void SetField(T instance, SetMemberBinder binder, object value) => SetField(instance, binder.Name, value);
@@ -216,7 +245,7 @@ namespace Horizon
 
         public static void SetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _indexers.Where(x => x.CanWrite)
+            var methods = container.Indexers.Where(x => x.CanWrite)
                                    .Select(x => x.GetSetCaller())
                                    .Where(x => x != null)
                                    .ToArray();
@@ -226,7 +255,7 @@ namespace Horizon
 
         public static bool TrySetIndexer(T instance, object[] indexes, object value)
         {
-            var methods = _indexers.Where(x => x.CanWrite)
+            var methods = container.Indexers.Where(x => x.CanWrite)
                                    .Select(x => x.GetSetCaller())
                                    .Where(x => x != null)
                                    .ToArray();
@@ -241,34 +270,34 @@ namespace Horizon
 
         public static object Call(T instance, string methodName, IEnumerable<object> args)
         {
-            var methods = _methods[methodName];
+            var methods = container.Methods[methodName];
             return CallerSelector.Call(instance, args, methods);
         }
 
         public static object Call(string methodName, IEnumerable<object> args)
         {
-            var methods = _methods[methodName];
+            var methods = container.Methods[methodName];
             return CallerSelector.Call(args, methods);
         }
 
         public static bool TryCall(T instance, string methodName, IEnumerable<object> args, out object result)
         {
-            var methods = _methods[methodName];
+            var methods = container.Methods[methodName];
             return CallerSelector.TryCall(instance, args, methods, out result);
         }
 
         public static bool TryCall(string methodName, IEnumerable<object> args, out object result)
         {
-            var methods = _methods[methodName];
+            var methods = container.Methods[methodName];
             return CallerSelector.TryCall(args, methods, out result);
         }
 
-        public static T Create(params object[] args) => (T)CallerSelector.Create(_constructors, args);
+        public static T Create(params object[] args) => (T)CallerSelector.Create(container.Constructors, args);
 
         public static bool TryCreate(out T instance, params object[] args)
 	    {
 		    object boxedInstance;
-		    if (CallerSelector.TryCreate(_constructors, args, out boxedInstance))
+		    if (CallerSelector.TryCreate(container.Constructors, args, out boxedInstance))
 		    {
 			    instance = (T) boxedInstance;
 			    return true;
@@ -281,7 +310,7 @@ namespace Horizon
         public static bool TryRaiseEvent(T instance, string @event, params dynamic[] arguments)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller))
+            if (!container.Events.TryGetValue(@event, out caller))
                 return false;
 
             caller.Raise(instance, arguments);
@@ -291,7 +320,7 @@ namespace Horizon
         public static bool TryAddEventHandler(T instance, string @event, params Delegate[] delegates)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller))
+            if (!container.Events.TryGetValue(@event, out caller))
                 return false;
 
             caller.Add(instance, delegates);
@@ -301,7 +330,7 @@ namespace Horizon
         public static bool TryRemoveEventHandler(T instance, string @event, params Delegate[] delegates)
         {
             EventCaller caller;
-            if (!_events.TryGetValue(@event, out caller))
+            if (!container.Events.TryGetValue(@event, out caller))
                 return false;
 
             caller.Remove(instance, delegates);
@@ -318,25 +347,25 @@ namespace Horizon
 
         public static bool HasProperty(string property) => HasGetterProperty(property) || HasSetterProperty(property);
 
-        public static bool HasGetterProperty(string property) => _properties.ContainsKey(property);
+        public static bool HasGetterProperty(string property) => container.Properties.ContainsKey(property);
 
-        public static bool HasSetterProperty(string property) => _properties.ContainsKey(property);
+        public static bool HasSetterProperty(string property) => container.Properties.ContainsKey(property);
 
-        public static bool HasGetterField(string field) => _fields.ContainsKey(field);
+        public static bool HasGetterField(string field) => container.Fields.ContainsKey(field);
 
-        public static bool HasSetterField(string field) => _fields.ContainsKey(field);
+        public static bool HasSetterField(string field) => container.Fields.ContainsKey(field);
 
-        public static bool HasMethod(string method) => _methods.Contains(method);
+        public static bool HasMethod(string method) => container.Methods.Contains(method);
 
-        public static IEnumerable<IMethodCaller> GetMethod(string method) => _methods[method];
+        public static IEnumerable<IMethodCaller> GetMethod(string method) => container.Methods[method];
 
-        public static bool HasEvent(string @event) => _events.ContainsKey(@event);
+        public static bool HasEvent(string @event) => container.Events.ContainsKey(@event);
 
-        public static IEventCaller GetEvent(string @event) => _events[@event];
+        public static IEventCaller GetEvent(string @event) => container.Events[@event];
 
-        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments) => Info.Extended.ResolveSpecificCaller(_methods[method], arguments);
+        public static IMethodCaller GetSpecificMethod(string method, params Type[] arguments) => Info.Extended.ResolveSpecificCaller(container.Methods[method], arguments);
 
-        public static IConstructorCaller GetConstructor(params Type[] arguments) => Info.Extended.ResolveSpecificCaller(_constructors, arguments);
+        public static IConstructorCaller GetConstructor(params Type[] arguments) => Info.Extended.ResolveSpecificCaller(container.Constructors, arguments);
 
 
 
@@ -381,7 +410,7 @@ namespace Horizon
 
         static MethodCaller Findop_Implicit(Type type)
         {
-            var methods = _methods["op_Implicit"];
+            var methods = container.Methods["op_Implicit"];
             var owner = typeof(T);
             var method = methods.FirstOrDefault(x => x.ReturnType == type && x.ParameterTypes[0].ParameterType == owner);
 
