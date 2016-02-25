@@ -6,7 +6,12 @@ namespace Horizon
     {
         MethodInfo GetSetMethod();
         MethodInfo GetGetMethod();
+
+        MethodCaller GetSetCaller();
+        MethodCaller GetGetCaller();
+
         PropertyInfo PropertyInfo { get; }
+
         bool IsIndexer { get; }
     }
 

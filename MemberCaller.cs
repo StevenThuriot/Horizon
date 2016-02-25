@@ -9,8 +9,8 @@ namespace Horizon
         readonly Lazy<Action<T, object>> _setter;
         readonly Lazy<Func<T, object>> _getter;
 
-        public readonly bool CanWrite;
-        public readonly bool CanRead;
+        public bool CanWrite { get; }
+        public bool CanRead { get; }
 
         public MemberInfo MemberInfo => _info;
         public string Name { get; }

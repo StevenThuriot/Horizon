@@ -17,6 +17,8 @@ namespace Horizon
         Type MemberType { get; }
         bool IsProperty { get; }
         bool IsField { get; }
+        bool CanWrite { get; }
+        bool CanRead { get; }
         object Get(object instance);
         void Set(object instance, object value);
         bool TryGet(object instance, out object result);

@@ -7,7 +7,8 @@ namespace Horizon
     class EventCaller : IEventCaller
     {
         readonly EventInfo _info;
-        
+        readonly Lazy<bool> _isStatic;
+
         readonly IMethodCaller _raise;
         readonly ICaller _add;
         readonly ICaller _remove;
@@ -18,6 +19,7 @@ namespace Horizon
         public EventCaller(EventInfo info)
         {
             _info = info;
+            _isStatic = new Lazy<bool>(() => _info.AddMethod.IsStatic);
 
             var raise = info.RaiseMethod;
             CanRaise = raise != null;
@@ -27,49 +29,48 @@ namespace Horizon
             _remove = new MethodCaller(info.RemoveMethod);
         }
 
-        public object Call(IEnumerable<dynamic> values) => _raise.Call(values);
-
-        public void Raise(dynamic instance, params dynamic[] arguments)
+        dynamic[] BuildCallerArguments(dynamic instance, dynamic[] arguments)
         {
             var length = arguments.Length;
-            var values = new dynamic[length + 1];
-            values[0] = instance;
+
+            if (!IsStatic)
+                length += 1;
+
+            var values = new dynamic[length];
+
+            if (!IsStatic)
+                values[0] = instance;
 
             if (length != 0)
                 Array.Copy(arguments, 0, values, 1, length);
 
+            return values;
+        }
+
+        public object Call(IEnumerable<dynamic> values) => _raise.Call(values);
+
+        public void Raise(dynamic instance, params dynamic[] arguments)
+        {
+            dynamic[] values = BuildCallerArguments(instance, arguments);
             _raise.Call(values);
         }
 
         public void Add(dynamic instance, params Delegate[] handlers)
         {
-            var length = handlers.Length;
-            var values = new dynamic[length + 1];
-            values[0] = instance;
-
-            if (length != 0)
-                Array.Copy(handlers, 0, values, 1, length);
-            
-
+            dynamic[] values = BuildCallerArguments(instance, handlers);
             _add.Call(values);
         }
 
         public void Remove(dynamic instance, params Delegate[] handlers)
         {
-            var length = handlers.Length;
-            var values = new dynamic[length + 1];
-            values[0] = instance;
-
-            if (length != 0)
-                Array.Copy(handlers, 0, values, 1, length);
-
+            dynamic[] values = BuildCallerArguments(instance, handlers);
             _remove.Call(values);
         }
 
         public string Name => _info.Name;
 
         public IReadOnlyList<SimpleParameterInfo> ParameterTypes => _raise.ParameterTypes;
-
-        public bool IsStatic => false;
+        
+        public bool IsStatic => _isStatic.Value;
     }
 }
