@@ -235,7 +235,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static object GetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes)
+		public static object GetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes)
 		{
 			var method = SelectMethod(callers, indexes);
 
@@ -251,7 +251,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static void SetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
+		public static void SetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, object value)
 		{
 			var input = indexes.ToList();
 			input.Add(value);
@@ -270,7 +270,7 @@ namespace Horizon
 			caller.Call(arguments);
 		}
 
-		public static bool TryGetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, out object result)
+		public static bool TryGetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, out object result)
 		{
 			var method = SelectMethod(callers, indexes);
 
@@ -290,7 +290,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static bool TrySetIndexer(object instance, IEnumerable<MethodCaller> callers, object[] indexes, object value)
+		public static bool TrySetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, object value)
 		{
 			var input = indexes.ToList();
 			input.Add(value);

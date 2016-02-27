@@ -41,9 +41,9 @@ namespace Horizon
 
         public PropertyInfo PropertyInfo => (PropertyInfo)_info;
 
-        public MethodCaller GetSetCaller() => _setCaller.Value;
+        public IMethodCaller GetSetCaller() => _setCaller.Value;
 
-        public MethodCaller GetGetCaller() => _getCaller.Value;
+        public IMethodCaller GetGetCaller() => _getCaller.Value;
 
     }
 }

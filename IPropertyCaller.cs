@@ -7,8 +7,8 @@ namespace Horizon
         MethodInfo GetSetMethod();
         MethodInfo GetGetMethod();
 
-        MethodCaller GetSetCaller();
-        MethodCaller GetGetCaller();
+        IMethodCaller GetSetCaller();
+        IMethodCaller GetGetCaller();
 
         PropertyInfo PropertyInfo { get; }
 
