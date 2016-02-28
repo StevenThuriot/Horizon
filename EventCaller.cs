@@ -42,7 +42,7 @@ namespace Horizon
                 values[0] = instance;
 
             if (length != 0)
-                Array.Copy(arguments, 0, values, 1, arguments.Length);
+                Array.Copy(arguments, 0, values, IsStatic ? 0 : 1, arguments.Length);
 
             return values;
         }
