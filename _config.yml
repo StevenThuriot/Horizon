@@ -10,9 +10,6 @@ exclude: [CNAME, README.md, .gitignore]
 permalink: / ## disables post output
 timezone: null
 lsi: false
-markdown: redcarpet
-redcarpet:
-  extensions: ["no_intra_emphasis", "fenced_code_blocks"]
 highlighter: pygments
 
 
