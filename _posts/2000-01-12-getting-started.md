@@ -118,3 +118,14 @@ public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, o
 ```		
 		
 Horizon will resolve the passed arguments from the binder and will call the correct overload. If the method returns a value, it will be passed as well. If not, it will pass `null`.
+
+### Static Classes
+
+Horizon also supports `static` classes, but you can't use these as a generic for our `Info<>` class. 
+For `static` classes, we can use the `Info.Static` section instead. It has (most of the) same methods as our normal `Info` class.
+
+e.g. : You can use Horizon as follows to set the value of a static property in a static class
+
+```csharp
+Info.Static.SetProperty(typeof(StaticClass), "MyProperty", "This is the new value");
+```
