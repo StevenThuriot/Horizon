@@ -1,64 +1,367 @@
----
----
 <!DOCTYPE html>
-<html dir="ltr" lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ site.title }}</title>
-	<meta name="keywords" content="{{ site.keywords }}">
-	<meta name="description" content="{{ site.description }}">
-  <link rel="stylesheet" href="combo.css">
-  <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-  {% if site.favicon %}<link rel="shortcut icon" href="{{ site.favicon }}" type="image/x-icon">{% endif %}
-	{% if site.touch_icon %}<link rel="apple-touch-icon" href="{{ site.touch_icon }}">{% endif %}
-</head>
-<body>
-  <div id="main">
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
 
-    <nav><ul>
-      {% for node in site.posts reversed %}
-        {% capture id %}{{ node.id | remove:'/' | downcase }}{% endcapture %}
-        <li class="p-{{id}}"><a href="#{{id}}">{{node.title}}</a></li>
-      {% endfor %}
-    </ul></nav>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
+    <title>Horizon by StevenThuriot</title>
+  </head>
 
-    {% for page in site.posts reversed %}
-      {% capture id %}{{ page.id | remove:'/' | downcase }}{% endcapture %}
-      <div id="{{id}}" class="section p-{{id}}">
-        {% if page.icon %}
-        <div class="subtlecircle sectiondivider imaged">
-          <img src="{{page.icon}}" alt="section icon" />
-          <h5 class="icon-title">{{ page.title }}</h5>
-        </div>
-        {% elsif page.fa-icon %}
-        <div class="subtlecircle sectiondivider faicon">
-          <span class="fa-stack">
-            <i class="fa fa-circle fa-stack-2x"></i>
-            <i class="fa fa-{{ page.fa-icon }} fa-stack-1x"></i>
-          </span>
-          <h5 class="icon-title">{{ page.title }}</h5>
-        </div>
-        {% endif %}
-        <div class="container {{ page.style }}">
-          {{ page.content }}
-        </div>
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Horizon</h1>
+        <h2>.NET Fast Very Late Binding invoker</h2>
+        <a href="https://github.com/StevenThuriot/Horizon" class="button"><small>View project on</small> GitHub</a>
       </div>
-    {% endfor %}
+    </header>
 
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p>…Reflection made easy …And fast!</p>
 
-    <div id="footer" class="section text-white">
-      <div class="container">
-        {% capture foottext %} {% include footer.md %} {% endcapture %}
-        {{ foottext | markdownify }}
+<h1>
+<a id="basically" class="anchor" href="#basically" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Basically…</h1>
+
+<h2>
+<a id="reflection-is-hard-and-dreadfully-slow" class="anchor" href="#reflection-is-hard-and-dreadfully-slow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reflection is hard… And dreadfully slow!</h2>
+
+<p>Horizon addresses these issues by supplying a <strong>simple to use</strong> API.</p>
+
+<p>Underneath the covers, Horizon will create and cache <strong>Expression Trees</strong>. This means there will be a small <em>one time hit</em> which will be hardly noticeable. </p>
+
+<h3>
+<a id="from-then-on-horizon-will-be-blazing-fast" class="anchor" href="#from-then-on-horizon-will-be-blazing-fast" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>From then on, Horizon will be <strong>blazing fast</strong>!</h3>
+
+<p>As if that wasn't enough, Horizon also supports the <em>DLR's Binders</em>, making it super easy to plug it into your very own <em>DynamicObject</em>s! Hooray!</p>
+
+<h2>
+<a id="so-what-exactly-can-horizon-do" class="anchor" href="#so-what-exactly-can-horizon-do" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>So what exactly can Horizon do?</h2>
+
+<p>Horizon can:</p>
+
+<ul>
+<li>Get and Set field and property values
+
+<ul>
+<li>Both private as public, whether it's on a base class or not.</li>
+</ul>
+</li>
+<li>Get and Set values and guess if it's a property or field.
+
+<ul>
+<li>In case you're not sure, or scared that the implementation in the third-party dll might change</li>
+</ul>
+</li>
+<li>Add event handlers</li>
+<li>Remove them again!</li>
+<li>Raise events</li>
+<li>Get or Set indexers.
+
+<ul>
+<li>With one or multiple parameters</li>
+</ul>
+</li>
+<li>Implicitly convert types
+
+<ul>
+<li>Or just check if it's possible.</li>
+</ul>
+</li>
+<li>Create instances
+
+<ul>
+<li>With or without parameters.</li>
+</ul>
+</li>
+<li>And most importantly: Call methods!</li>
+<li>With safe to use <code>Try</code> variants for each method, in case your input is incorrect. 
+
+<ul>
+<li>Returns a bool instead, with possibly an <code>out</code> parameter.</li>
+</ul>
+</li>
+<li>Check if a field, property, event or method exists on the given type.</li>
+</ul>
+
+<h2>
+<a id="setup-as-a-submodule" class="anchor" href="#setup-as-a-submodule" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup as a submodule</h2>
+
+<ul>
+<li>Simple as using a <code>git</code> <a href="http://git-scm.com/book/en/v2/Git-Tools-Submodules">command</a>!</li>
+<li>Go to your project's folder.</li>
+<li>Just run <code>git submodule add {{ site.source_link }}.git</code>
+</li>
+</ul>
+
+<p>And you're done! Ready, start, go! Back to work!</p>
+
+<hr>
+
+<h2>
+<a id="setup-as-standalone-project" class="anchor" href="#setup-as-standalone-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup as standalone project</h2>
+
+<ul>
+<li>Horizon is also maintained as a DLL.
+
+<ul>
+<li>Or an actual project, if that's what you fancy!</li>
+</ul>
+</li>
+<li>Exposing only the absolute minimum!</li>
+<li>For your pleasure…</li>
+<li>Hop on over to <a href="https://github.com/StevenThuriot/Horizon-project">GitHub</a> and get your fix, today!</li>
+</ul>
+
+<hr>
+
+<h2>
+<a id="setup-using-nuget" class="anchor" href="#setup-using-nuget" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup using NuGet</h2>
+
+<ul>
+<li>Not quite there yet! </li>
+<li>More to come later…</li>
+</ul>
+
+<h2>
+<a id="getting-started-with-horizon" class="anchor" href="#getting-started-with-horizon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Getting Started with Horizon</h2>
+
+<h3>
+<a id="the-basics" class="anchor" href="#the-basics" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The basics</h3>
+
+<p>Everything you need is in the <code>Horizon</code> namespace, so start by including it</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">using</span> Horizon<span class="pl-k">;</span></pre></div>
+
+<p>The easiest starting point is the static <code>Info</code> class. It requires a generic parameter. The generic is the type you want to query for info.</p>
+
+<div class="highlight highlight-source-cs"><pre>Info&lt;T&gt;</pre></div>
+
+<p>A static constructor will be loaded, caching the information about this type once. At this point, the execution trees won't be compiled just yet, to keep the hit as small as possible. A simple <a href="https://msdn.microsoft.com/en-us/library/k2w5ey1e.aspx"><code>GetMembers</code></a> call is launched to get all the available info for the current type. This is parsed and converted to metadata Horizon can understand and work with.</p>
+
+<p>Imagine we want to resolve the value of the field <code>_randomField</code>.</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> @<span class="pl-k">class</span> = <span class="pl-k">new</span> ClassWithFields();
+<span class="pl-k">var</span> <span class="pl-k">value</span> = Info&lt;T&gt;.GetField(@<span class="pl-k">class</span>, <span class="pl-s"><span class="pl-pds">"</span>_randomField<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>The field getter will only now be compiled and cached. All the other getters will be left untouched. (In other words, they're lazy compiled).</p>
+
+<p>A generic type is not always a possibility. Horizon can also auto-resolve using an existing instance, instead. Continuing our previous example, it would look like this.</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> <span class="pl-k">value</span> = Info.GetField(@<span class="pl-k">class</span>, <span class="pl-s"><span class="pl-pds">"</span>_randomField<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>For ease of use, it can also be invoked as an extension method.</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> <span class="pl-k">value</span> = @<span class="pl-k">class</span>.GetField(<span class="pl-s"><span class="pl-pds">"</span>_randomField<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>For obvious reasons, auto-resolving the type will have a small (almost non-existing) overhead compared to the generic call.</p>
+
+<h3>
+<a id="extended-info" class="anchor" href="#extended-info" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Extended Info</h3>
+
+<p>Extended info is also available, which can be found in a static subclass.</p>
+
+<div class="highlight highlight-source-cs"><pre>Info&lt;T&gt;.Extended</pre></div>
+
+<p>This static class contains a list of all the metadata Horizon is using for that type. (Methods, properties, constructors, etc)</p>
+
+<p>Just like the normal <code>Info</code> class, the <code>Extended</code> class allows you to auto-resolve the type.</p>
+
+<div class="highlight highlight-source-cs"><pre>Info.Extended.Fields(@<span class="pl-k">class</span>);</pre></div>
+
+<p>This class also allows you to pass a <code>Type</code> instead of an instance, in case you don't have one yet.</p>
+
+<div class="highlight highlight-source-cs"><pre>Info.Extended.Fields(<span class="pl-k">typeof</span> (ClassWithFields));</pre></div>
+
+<p>Of course, this caller will have an added performance hit since it will try to resolve the metadata through the normal handler. This way it is shared between the two. The expression tree to resolve the data will be cached, so it will be a one-time hit.</p>
+
+<h3>
+<a id="dlr" class="anchor" href="#dlr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>DLR</h3>
+
+<p>Horizon supports .NET's DLR. This means a lot of the calls on the <code>Info</code> class have an overload that accept an implementation of the <a href="https://msdn.microsoft.com/en-us/library/system.runtime.compilerservices.callsitebinder.aspx"><code>CallSiteBinder</code></a>.</p>
+
+<p>In a nutshell, this means it's very easy to plug <code>Horizon</code> into any of your projects that uses <a href="https://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject.aspx"><code>DynamicObject</code></a> implementations.</p>
+
+<h3>
+<a id="the-real-fancy-stuff" class="anchor" href="#the-real-fancy-stuff" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The real fancy stuff</h3>
+
+<p>For simple calls, like getting values from fields and properties, an <code>Expression Tree</code> will be compiled and cached. After compilation, the execution hit is barely slower than making the actual call.</p>
+
+<p>For more advanced calls, like methods that have named arguments and parameters with default values, a <code>CallSiteBinder</code> will be constructed, just like the DLR does! That makes it just as snappy as working with a regular dynamic object.</p>
+
+<p>Horizon is smart enough to find the correct overload to use when calling a method, even if it means having to implicitely cast an instance first. When calling a method that requires more parameters than supplied, it will check for default values first. Named arguments are also supported, so it's possible to swap instances around, just like in regular C# code.</p>
+
+<h3>
+<a id="actually-calling-a-method" class="anchor" href="#actually-calling-a-method" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Actually calling a method...</h3>
+
+<p>...Would look a little like this for a method without parameters (or one that has all defaultValues filled in):</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> <span class="pl-k">value</span> = @<span class="pl-k">class</span>.Call(<span class="pl-s"><span class="pl-pds">"</span>MyMethod<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>Or like this, in case you pass values:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">var</span> <span class="pl-k">value</span> = @<span class="pl-k">class</span>.Call(<span class="pl-s"><span class="pl-pds">"</span>MyMethodWithParameters<span class="pl-pds">"</span></span>, <span class="pl-c1">1</span>, <span class="pl-s"><span class="pl-pds">"</span>one<span class="pl-pds">"</span></span>, <span class="pl-k">new</span> OtherParameterClass());</pre></div>
+
+<p>When passing the <code>CallSiteBinder</code>, it will use named arguments as well. This is a sample that could be used when overriding <code>DynamicObject</code>.        </p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">public</span> <span class="pl-k">override</span> <span class="pl-k">bool</span> TryInvokeMember(InvokeMemberBinder binder, <span class="pl-k">object</span>[] args, out <span class="pl-k">object</span> result)       
+
+  <span class="pl-k">object</span> output;        
+  <span class="pl-k">if</span> (_realInstance.TryCall(binder, args, out output))      
+  {     
+    result = output;        
+    <span class="pl-k">return</span> <span class="pl-c1">true</span>;        
+  }     
+
+  result = <span class="pl-c1">null</span>;        
+  <span class="pl-k">return</span> <span class="pl-c1">false</span>;     
+}       
+</pre></div>
+
+<p>Horizon will resolve the passed arguments from the binder and will call the correct overload. If the method returns a value, it will be passed as well. If not, it will pass <code>null</code>.</p>
+
+<h3>
+<a id="static-classes" class="anchor" href="#static-classes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Static Classes</h3>
+
+<p>Horizon also supports <code>static</code> classes, but you can't use these as a generic for our <code>Info&lt;&gt;</code> class. 
+For <code>static</code> classes, we can use the <code>Info.Static</code> section instead. It has (most of the) same methods as our normal <code>Info</code> class.</p>
+
+<p>e.g. : You can use Horizon as follows to set the value of a static property in a static class</p>
+
+<div class="highlight highlight-source-cs"><pre>Info.Static.SetProperty(<span class="pl-k">typeof</span>(StaticClass), <span class="pl-s"><span class="pl-pds">"</span>MyProperty<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>This is the new value<span class="pl-pds">"</span></span>);</pre></div>
+
+<h2>
+<a id="contributing-to-horizon" class="anchor" href="#contributing-to-horizon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributing to Horizon</h2>
+
+<p>Want to hack on Horizon? Awesome! We'd love for you to contribute to our source code and to make Horizon even better than it is today!</p>
+
+<hr>
+
+<h3>
+<a id="got-a-question-or-problem" class="anchor" href="#got-a-question-or-problem" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Got a Question or Problem?</h3>
+
+<p>If you have questions about how to use Horizon, feel free to contact through <a href="https://github.com/StevenThuriot/Horizon/issues">GitHub</a>.</p>
+
+<h3>
+<a id="found-an-issue" class="anchor" href="#found-an-issue" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Found an Issue?</h3>
+
+<p>If you find a bug in the source code or a mistake in the documentation, you can help us by submitting an issue to our <a href="https://github.com/StevenThuriot/Horizon">GitHub Repository</a>. </p>
+
+<p>Even better, you can submit a Pull Request with a fix.</p>
+
+<hr>
+
+<h3>
+<a id="want-a-feature" class="anchor" href="#want-a-feature" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Want a Feature?</h3>
+
+<p>You can request a new feature by submitting an issue to our <a href="https://github.com/StevenThuriot/Horizon">GitHub Repository</a>. </p>
+
+<p>Pull Request will also be accepted!</p>
+
+<hr>
+
+<h3>
+<a id="submitting-a-pull-request" class="anchor" href="#submitting-a-pull-request" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Submitting a Pull Request</h3>
+
+<p>Before you submit your pull request consider the following:</p>
+
+<p>Search <a href="https://github.com/StevenThuriot/Horizon/pulls">GitHub</a> for an open or closed Pull Request that relates to your submission. You don't want to duplicate effort.</p>
+
+<p>Make your changes in a new git branch:</p>
+
+<pre><code>git checkout -b my-fix-branch master
+</code></pre>
+
+<p>Commit your changes using a descriptive commit message.</p>
+
+<pre><code>git commit -a
+</code></pre>
+
+<p>Note: the optional commit <code>-a</code> command line option will automatically "add" and "rm" edited files.</p>
+
+<p>Push your branch to GitHub:</p>
+
+<pre><code>git push origin my-fix-branch
+</code></pre>
+
+<p>In GitHub, send a pull request to <code>Horizon:master</code>.
+If we suggest changes then:</p>
+
+<ul>
+<li>Make the required updates.</li>
+<li>Rebase your branch and force push to your GitHub repository (this will update your Pull Request):</li>
+</ul>
+
+<pre><code>git rebase master -i
+git push origin my-fix-branch -f
+</code></pre>
+
+<p>That's it! Thank you for your contribution!</p>
+
+<h4>
+<a id="after-your-pull-request-is-merged" class="anchor" href="#after-your-pull-request-is-merged" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>After your pull request is merged</h4>
+
+<p>After your pull request is merged, you can safely delete your branch and pull the changes
+from the main (upstream) repository:</p>
+
+<p>Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:</p>
+
+<pre><code>git push origin --delete my-fix-branch
+</code></pre>
+
+<p>Check out the master branch:</p>
+
+<pre><code>git checkout master -f
+</code></pre>
+
+<p>Delete the local branch:</p>
+
+<pre><code>git branch -D my-fix-branch
+</code></pre>
+
+<p>Update your master with the latest upstream version:</p>
+
+<pre><code>git pull --ff upstream master
+</code></pre>
+
+<h2>
+<a id="projects-currently-using-horizon" class="anchor" href="#projects-currently-using-horizon" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Projects Currently Using Horizon</h2>
+
+<p>If you want to see a real-life sample of Horizon at work, you can hop over to any of the following projects:</p>
+
+<ul>
+<li><a href="//github.com/StevenThuriot/Falsy">Falsy</a></li>
+<li><a href="//github.com/StevenThuriot/ErrorCode">ErrorCode</a></li>
+</ul>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/StevenThuriot/Horizon/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/StevenThuriot/Horizon/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/StevenThuriot/Horizon"></a> is maintained by <a href="https://github.com/StevenThuriot">StevenThuriot</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
       </div>
     </div>
-  </div>
 
-{% include analytics.html %}
-</body>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="site.js"></script>
+  
+  </body>
 </html>
