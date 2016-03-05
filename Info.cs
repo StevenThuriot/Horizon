@@ -163,18 +163,18 @@ namespace Horizon
             return CallerSelector.TrySetIndexer(instance, methods, indexes, value);
         }
 
-        public static object Call(T instance, InvokeMemberBinder binder, IEnumerable<object> args) => Call(instance, binder.Name, args);
-        public static object Call(InvokeMemberBinder binder, IEnumerable<object> args) => Call(binder.Name, args);
+        public static object Call(T instance, InvokeMemberBinder binder, params object[] args) => Call(instance, binder.Name, args);
+        public static object Call(InvokeMemberBinder binder, params object[] args) => Call(binder.Name, args);
         public static bool TryCall(T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result) => TryCall(instance, binder.Name, args, out result);
         public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, out object result) => TryCall(binder.Name, args, out result);
 
-        public static object Call(T instance, string methodName, IEnumerable<object> args)
+        public static object Call(T instance, string methodName, params object[] args)
         {
             var methods = container.Methods[methodName];
-            return CallerSelector.Call(instance, args, methods);
+            return CallerSelector.Call(instance, methods, args);
         }
 
-        public static object Call(string methodName, IEnumerable<object> args)
+        public static object Call(string methodName, params object[] args)
         {
             var methods = container.Methods[methodName];
             return CallerSelector.Call(args, methods);
@@ -183,13 +183,13 @@ namespace Horizon
         public static bool TryCall(T instance, string methodName, IEnumerable<object> args, out object result)
         {
             var methods = container.Methods[methodName];
-            return CallerSelector.TryCall(instance, args, methods, out result);
+            return CallerSelector.TryCall(instance, methods, args, out result);
         }
 
         public static bool TryCall(string methodName, IEnumerable<object> args, out object result)
         {
             var methods = container.Methods[methodName];
-            return CallerSelector.TryCall(args, methods, out result);
+            return CallerSelector.TryCall(methods, args, out result);
         }
 
         public static T Create(params object[] args) => (T)CallerSelector.Create(container.Constructors, args);
@@ -207,7 +207,7 @@ namespace Horizon
 		    return false;
 	    }
 
-        public static bool TryRaiseEvent(T instance, string @event, params dynamic[] arguments)
+        public static bool TryRaiseEvent(T instance, string @event, params object[] arguments)
         {
             EventCaller caller;
             if (!container.Events.TryGetValue(@event, out caller))

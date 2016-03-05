@@ -207,20 +207,20 @@ namespace Horizon
                 return CallerSelector.TrySetIndexer((object) null, methods, indexes, value);
             }
 
-            public static object Call(Type type, InvokeMemberBinder binder, IEnumerable<object> args) => Call(type, binder.Name, args);
+            public static object Call(Type type, InvokeMemberBinder binder, params object[] args) => Call(type, binder.Name, args);
             public static bool TryCall(Type type, InvokeMemberBinder binder, IEnumerable<object> args, out object result) => TryCall(type, binder.Name, args, out result);
 
-            public static object Call(Type type, string methodName, IEnumerable<object> args)
+            public static object Call(Type type, string methodName, params object[] args)
             {
                 var methods = ResolveInfoContainer(type).Methods[methodName];
-                return CallerSelector.Call((object)null, args, methods);
+                return CallerSelector.Call((object)null, methods, args);
             }
 
 
             public static bool TryCall(Type type, string methodName, IEnumerable<object> args, out object result)
             {
                 var methods = ResolveInfoContainer(type).Methods[methodName];
-                return CallerSelector.TryCall((object)null, args, methods, out result);
+                return CallerSelector.TryCall((object)null, methods, args, out result);
             }
                        
             public static bool TryRaiseEvent(Type type, string @event, params dynamic[] arguments)

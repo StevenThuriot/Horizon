@@ -89,7 +89,7 @@ namespace Horizon
         }
 
         
-	    public static Delegate BuildCallSite(this MethodInfo method, IEnumerable<object> variables)
+	    public static Delegate BuildCallSite(this MethodInfo method, params object[] variables)
         {
             var argumentCounter = variables.Count();
             

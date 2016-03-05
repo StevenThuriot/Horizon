@@ -50,7 +50,7 @@ namespace Horizon
 
         static readonly Stack<string> EmptyStack = new Stack<string>();
 
-        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(IEnumerable<ICaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(IEnumerable<ICaller> callers, params object[] args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
@@ -59,7 +59,7 @@ namespace Horizon
 			return SelectMethod(callers, arguments, EmptyStack);
 		}
 
-        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(CallInfo callInfo, IEnumerable<ICaller> callers, IEnumerable<object> args)
+        public static Tuple<ICaller, IReadOnlyList<dynamic>> SelectMethod(CallInfo callInfo, IEnumerable<ICaller> callers, params object[] args)
 		{
 			if (callers == null || !callers.Any())
 				return null;
@@ -103,7 +103,7 @@ namespace Horizon
 		}
 
 
-		public static object Call(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		public static object Call(InvokeMemberBinder binder, IEnumerable<MethodCaller> callers, params object[] args)
 		{
 			var method = SelectMethod(binder.CallInfo, callers, args);
 
@@ -116,7 +116,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		public static object Call(object instance, InvokeMemberBinder binder, IEnumerable<MethodCaller> callers, params object[] args)
 		{
 			var method = SelectMethod(binder.CallInfo, callers, args);
 
@@ -132,7 +132,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static bool TryCall(InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		public static bool TryCall(InvokeMemberBinder binder, IEnumerable<MethodCaller> callers, IEnumerable<object> args, out object result)
 		{
 			var method = SelectMethod(binder.CallInfo, callers, args);
 
@@ -149,7 +149,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		public static bool TryCall(object instance, InvokeMemberBinder binder, IEnumerable<MethodCaller> callers, IEnumerable<object> args, out object result)
 		{
 			var method = SelectMethod(binder.CallInfo, callers, args);
 
@@ -169,7 +169,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static object Call(IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		public static object Call(IEnumerable<MethodCaller> callers, params object[] args)
 		{
 			var method = SelectMethod(callers, args);
 
@@ -182,7 +182,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static object Call(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers)
+		public static object Call(object instance, IEnumerable<MethodCaller> callers, params object[] args)
 		{
 			var method = SelectMethod(callers, args);
 
@@ -198,7 +198,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static bool TryCall(IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		public static bool TryCall(IEnumerable<MethodCaller> callers, IEnumerable<object> args, out object result)
 		{
 			var method = SelectMethod(callers, args);
 
@@ -215,7 +215,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static bool TryCall(object instance, IEnumerable<object> args, IEnumerable<MethodCaller> callers, out object result)
+		public static bool TryCall(object instance, IEnumerable<MethodCaller> callers, IEnumerable<object> args, out object result)
 		{
 			var method = SelectMethod(callers, args);
 
@@ -235,7 +235,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static object GetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes)
+		public static object GetIndexer(object instance, IEnumerable<IMethodCaller> callers, params object[] indexes)
 		{
 			var method = SelectMethod(callers, indexes);
 
@@ -251,7 +251,7 @@ namespace Horizon
 			return caller.Call(arguments);
 		}
 
-		public static void SetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, object value)
+		public static void SetIndexer(object instance, IEnumerable<IMethodCaller> callers, IEnumerable<object> indexes, object value)
 		{
 			var input = indexes.ToList();
 			input.Add(value);
@@ -270,7 +270,7 @@ namespace Horizon
 			caller.Call(arguments);
 		}
 
-		public static bool TryGetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, out object result)
+		public static bool TryGetIndexer(object instance, IEnumerable<IMethodCaller> callers, IEnumerable<object> indexes, out object result)
 		{
 			var method = SelectMethod(callers, indexes);
 
@@ -290,7 +290,7 @@ namespace Horizon
 			return true;
 		}
 
-		public static bool TrySetIndexer(object instance, IEnumerable<IMethodCaller> callers, object[] indexes, object value)
+		public static bool TrySetIndexer(object instance, IEnumerable<IMethodCaller> callers, IEnumerable<object> indexes, object value)
 		{
 			var input = indexes.ToList();
 			input.Add(value);
@@ -311,7 +311,7 @@ namespace Horizon
 		}
 
 
-		public static object Create(IEnumerable<ConstructorCaller> ctors, IEnumerable<object> arguments)
+		public static object Create(IEnumerable<ConstructorCaller> ctors, params object[] arguments)
 		{
 			var ctor = SelectMethod(ctors, arguments);
 

@@ -37,11 +37,11 @@ namespace Horizon
         
         public static bool TrySetIndexer<T>(this T instance, object[] indexes, object value) => Info<T>.TrySetIndexer(instance, indexes, value);
 
-        public static object Call<T>(this T instance, InvokeMemberBinder binder, IEnumerable<object> args) => Info<T>.Call(instance, binder, args);
+        public static object Call<T>(this T instance, InvokeMemberBinder binder, params object[] args) => Info<T>.Call(instance, binder, args);
 
         public static bool TryCall<T>(this T instance, InvokeMemberBinder binder, IEnumerable<object> args, out object result) => Info<T>.TryCall(instance, binder, args, out result);
 
-        public static object Call<T>(this T instance, string methodName, IEnumerable<object> args) => Info<T>.Call(instance, methodName, args);
+        public static object Call<T>(this T instance, string methodName, params object[] args) => Info<T>.Call(instance, methodName, args);
 
         public static bool TryCall<T>(this T instance, string methodName, IEnumerable<object> args, out object result) => Info<T>.TryCall(instance, methodName, args, out result);
 
