@@ -177,7 +177,7 @@ namespace Horizon
         public static object Call(string methodName, params object[] args)
         {
             var methods = container.Methods[methodName];
-            return CallerSelector.Call(args, methods);
+            return CallerSelector.Call(methods, args);
         }
 
         public static bool TryCall(T instance, string methodName, IEnumerable<object> args, out object result)
