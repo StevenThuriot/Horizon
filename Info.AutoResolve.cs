@@ -23,7 +23,7 @@ namespace Horizon
 
         public static bool TryGetProperty<T>(this T instance, string property, out object result) => Info<T>.TryGetProperty(instance, property, out result);
 
-        public static bool TryGetField<T>(this T instance, string field, out object result) => Info<T>.TryGetProperty(instance, field, out result);
+        public static bool TryGetField<T>(this T instance, string field, out object result) => Info<T>.TryGetField(instance, field, out result);
 
         public static object GetIndexer<T>(this T instance, object[] indexes) => Info<T>.GetIndexer(instance, indexes);
 
