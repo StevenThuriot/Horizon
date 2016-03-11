@@ -18,11 +18,11 @@ namespace Horizon
         public static void SetField(T instance, string field, object value) => container.Fields[field].Set(instance, value);
 
         public static void RaiseEvent(T instance, string @event, params dynamic[] arguments) => container.Events[@event].Raise(instance, arguments);
-        
-        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Add(instance, delegates); 
 
-        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Remove(instance, delegates); 
-        
+        public static void AddEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Add(instance, delegates);
+
+        public static void RemoveEventHandler(T instance, string @event, params Delegate[] delegates) => container.Events[@event].Remove(instance, delegates);
+
         public static object GetValue(T instance, string propertyOrField)
         {
             PropertyCaller<T> getter;
@@ -81,7 +81,7 @@ namespace Horizon
 
         public static void SetValue(T instance, SetMemberBinder binder, object value) => SetValue(instance, binder.Name, value);
         public static bool TrySetValue(T instance, SetMemberBinder binder, object value) => TrySetValue(instance, binder.Name, value);
-        
+
 
         public static bool TryGetProperty(T instance, string property, out object result)
         {
@@ -92,7 +92,7 @@ namespace Horizon
             result = null;
             return false;
         }
-        
+
         public static bool TryGetField(T instance, string field, out object result)
         {
             MemberCaller<T> getter;
@@ -195,17 +195,17 @@ namespace Horizon
         public static T Create(params object[] args) => (T)CallerSelector.Create(container.Constructors, args);
 
         public static bool TryCreate(out T instance, params object[] args)
-	    {
-		    object boxedInstance;
-		    if (CallerSelector.TryCreate(container.Constructors, args, out boxedInstance))
-		    {
-			    instance = (T) boxedInstance;
-			    return true;
-		    }
+        {
+            object boxedInstance;
+            if (CallerSelector.TryCreate(container.Constructors, args, out boxedInstance))
+            {
+                instance = (T)boxedInstance;
+                return true;
+            }
 
-		    instance = default(T);
-		    return false;
-	    }
+            instance = default(T);
+            return false;
+        }
 
         public static bool TryRaiseEvent(T instance, string @event, params object[] arguments)
         {
@@ -247,13 +247,49 @@ namespace Horizon
 
         public static bool HasProperty(string property) => HasGetterProperty(property) || HasSetterProperty(property);
 
-        public static bool HasGetterProperty(string property) => container.Properties.ContainsKey(property);
+        public static bool HasGetterProperty(string property)
+        {
+            PropertyCaller<T> caller;
+            if (container.Properties.TryGetValue(property, out caller))
+            {
+                return caller.CanRead;
+            }
 
-        public static bool HasSetterProperty(string property) => container.Properties.ContainsKey(property);
+            return false;
+        }
 
-        public static bool HasGetterField(string field) => container.Fields.ContainsKey(field);
+        public static bool HasSetterProperty(string property)
+        {
+            PropertyCaller<T> caller;
+            if (container.Properties.TryGetValue(property, out caller))
+            {
+                return caller.CanWrite;
+            }
 
-        public static bool HasSetterField(string field) => container.Fields.ContainsKey(field);
+            return false;
+        }
+
+        public static bool HasGetterField(string field)
+        {
+            MemberCaller<T> caller;
+            if (container.Fields.TryGetValue(field, out caller))
+            {
+                return caller.CanRead;
+            }
+
+            return false;
+        }
+
+        public static bool HasSetterField(string field)
+        {
+            MemberCaller<T> caller;
+            if (container.Fields.TryGetValue(field, out caller))
+            {
+                return caller.CanWrite;
+            }
+
+            return false;
+        }
 
         public static bool HasMethod(string method) => container.Methods.Contains(method);
 

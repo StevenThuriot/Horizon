@@ -262,13 +262,49 @@ namespace Horizon
 
             public static bool HasProperty(Type type, string property) => HasGetterProperty(type, property) || HasSetterProperty(type, property);
 
-            public static bool HasGetterProperty(Type type, string property) => ResolveInfoContainer(type).Properties.ContainsKey(property);
+            public static bool HasGetterProperty(Type type, string property)
+            {
+                IPropertyCaller caller;
+                if (ResolveInfoContainer(type).Properties.TryGetValue(property, out caller))
+                {
+                    return caller.CanRead;
+                }
 
-            public static bool HasSetterProperty(Type type, string property) => ResolveInfoContainer(type).Properties.ContainsKey(property);
+                return false;
+            }
 
-            public static bool HasGetterField(Type type, string field) => ResolveInfoContainer(type).Fields.ContainsKey(field);
+            public static bool HasSetterProperty(Type type, string property)
+            {
+                IPropertyCaller caller;
+                if (ResolveInfoContainer(type).Properties.TryGetValue(property, out caller))
+                {
+                    return caller.CanWrite;
+                }
 
-            public static bool HasSetterField(Type type, string field) => ResolveInfoContainer(type).Fields.ContainsKey(field);
+                return false;
+            }
+
+            public static bool HasGetterField(Type type, string field)
+            {
+                IMemberCaller caller;
+                if (ResolveInfoContainer(type).Fields.TryGetValue(field, out caller))
+                {
+                    return caller.CanRead;
+                }
+
+                return false;
+            }
+
+            public static bool HasSetterField(Type type, string field)
+            {
+                IMemberCaller caller;
+                if (ResolveInfoContainer(type).Fields.TryGetValue(field, out caller))
+                {
+                    return caller.CanWrite;
+                }
+
+                return false;
+            }
 
             public static bool HasMethod(Type type, string method) => ResolveInfoContainer(type).Methods.Contains(method);
 
